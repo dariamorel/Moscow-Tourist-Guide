@@ -19,6 +19,7 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
@@ -29,7 +30,8 @@ class MapActivity : ComponentActivity(), MapListener, LocationListener {
     private lateinit var mMyLocationOverlay: MyLocationNewOverlay
     private lateinit var locationManager: LocationManager
     private lateinit var binding: ActivityMapBinding
-    private val targetZoomLevel = 20.0
+    private val targetZoomLevel = 15.0
+    private val mskGeoPoint = GeoPoint(55.751244, 37.618423)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,47 +54,46 @@ class MapActivity : ComponentActivity(), MapListener, LocationListener {
     private fun initializeMap() {
         mMyLocationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(this), mMap)
         controller = mMap.controller
+        controller.setCenter(mskGeoPoint)
+        controller.setZoom(targetZoomLevel)
 
-        mMyLocationOverlay.enableMyLocation()
-        mMyLocationOverlay.enableFollowLocation()
-        mMyLocationOverlay.isDrawAccuracyEnabled = true
+//        mMyLocationOverlay.enableMyLocation()
+//        mMyLocationOverlay.enableFollowLocation()
+//        mMyLocationOverlay.isDrawAccuracyEnabled = true
 
 
-        val myLocationButton = binding.myLocationButton
-        myLocationButton.setOnClickListener {
-// Get the current location from the MyLocationNewOverlay
-            val myLocation = mMyLocationOverlay.myLocation
+//        val myLocationButton = binding.myLocationButton
+//        myLocationButton.setOnClickListener {
+//// Get the current location from the MyLocationNewOverlay
+//            val myLocation = mMyLocationOverlay.myLocation
+//
+//            if (myLocation != null) {
+//// Move the map to the current location
+//                controller.setCenter(myLocation)
+//                controller.animateTo(myLocation)
+//                controller.setZoom(targetZoomLevel)
+//            } else {
+//                Toast.makeText(this, "Location not available yet.", Toast.LENGTH_SHORT).show()
+//            }
+//        }
 
-            if (myLocation != null) {
-// Move the map to the current location
-                controller.setCenter(myLocation)
-                controller.animateTo(myLocation)
-                controller.setZoom(targetZoomLevel)
-            } else {
-                Toast.makeText(this, "Location not available yet.", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        Log.e("TAG", "onCreate:in ${controller.zoomIn()}")
-        Log.e("TAG", "onCreate: out ${controller.zoomOut()}")
-
-        mMap.overlays.add(mMyLocationOverlay)
+//        mMap.overlays.add(mMyLocationOverlay)
         mMap.addMapListener(this)
 
 // Initialize LocationManager
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+//        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 // Request location updates
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestLocationPermission()
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1f, this)
+//        if (ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_FINE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_COARSE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            requestLocationPermission()
+//        }
+//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1f, this)
     }
 
 
