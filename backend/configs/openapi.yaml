@@ -1,0 +1,343 @@
+openapi: 3.0.3
+info:
+  title: Tour Guide API
+  version: 1.0.0
+  description: API для работы с достопримечательностями, маршрутами и пользователями.
+
+servers:
+  - url: http://localhost:8000
+    description: Локальный сервер
+
+paths:
+  /sights/{sightId}:
+    get:
+      summary: Получить достопримечательность по ID
+      parameters:
+        - name: sightId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sight'
+        '404':
+          description: Достопримечательность не найдена
+
+  /sights:
+    get:
+      summary: Получить список всех достопримечательностей
+      responses:
+        '200':
+          description: Список достопримечательностей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sight'
+
+  /routes:
+    get:
+      summary: Получить все маршруты
+      responses:
+        '200':
+          description: Список маршрутов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+
+  /routes/passed:
+    get:
+      summary: Получить пройденные маршруты пользователя
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список пройденных маршрутов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+
+  /routes/declined:
+    get:
+      summary: Получить отклонённые маршруты пользователя
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список отклонённых маршрутов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+
+  /routes/in_progress:
+    get:
+      summary: Получить маршруты в процессе
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список маршрутов в процессе
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+
+  /routes:
+    post:
+      summary: Добавить новый маршрут
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteInput'
+      responses:
+        '201':
+          description: Маршрут успешно добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+
+  /routes/{routeId}:
+    put:
+      summary: Обновить маршрут
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteInput'
+      responses:
+        '200':
+          description: Маршрут обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+        '404':
+          description: Маршрут не найден
+
+  /users/registration:
+    post:
+      summary: Регистрация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/login:
+    post:
+      summary: Авторизация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '200':
+          description: Успешный вход
+        '401':
+          description: Неверный логин или пароль
+
+  /achievements:
+    get:
+      summary: Получить все достижения
+      responses:
+        '200':
+          description: Список достижений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Achievement'
+
+  /achievements/completed:
+    get:
+      summary: Получить завершённые достижения пользователя
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список завершённых достижений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Achievement'
+
+  /achievements:
+    put:
+      summary: Обновить достижения пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAchievementInput'
+      responses:
+        '200':
+          description: Достижения обновлены
+
+components:
+  schemas:
+    Sight:
+      type: object
+      properties:
+        id:
+          type: integer
+        img:
+          type: string
+        lat:
+          type: integer
+        lon:
+          type: integer
+        tag:
+          type: array
+          items:
+            type: string
+        short_desc:
+          type: string
+        desc:
+          type: string
+        timetable:
+          type: string
+        addr:
+          type: string
+        phone:
+          type: string
+        subway:
+          type: string
+
+    Route:
+      type: object
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        planned_order:
+          type: integer
+        user_id:
+          type: integer
+        total_time:
+          type: string
+        date:
+          type: string
+          format: date-time
+
+    RouteInput:
+      type: object
+      properties:
+        order:
+          type: integer
+        planned_order:
+          type: integer
+        user_id:
+          type: integer
+        total_time:
+          type: string
+        date:
+          type: string
+          format: date-time
+      required:
+        - order
+        - planned_order
+        - user_id
+        - total_time
+        - date
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        login:
+          type: string
+        password:
+          type: string
+
+    UserInput:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+      required:
+        - login
+        - password
+
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: integer
+        count:
+          type: integer
+        tag:
+          type: string
+
+    UserAchievementInput:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        achievement_id:
+          type: integer
+      required:
+        - user_id
+        - achievement_id
