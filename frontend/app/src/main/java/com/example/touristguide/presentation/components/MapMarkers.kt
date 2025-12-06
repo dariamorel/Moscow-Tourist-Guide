@@ -1,5 +1,8 @@
 package com.example.touristguide.presentation.components
 
+import android.graphics.drawable.Drawable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.example.touristguide.domain.entities.Sight
