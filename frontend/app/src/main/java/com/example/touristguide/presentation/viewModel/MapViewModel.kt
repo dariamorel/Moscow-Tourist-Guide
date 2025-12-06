@@ -1,4 +1,4 @@
-package com.example.touristguide
+package com.example.touristguide.presentation.viewModel
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

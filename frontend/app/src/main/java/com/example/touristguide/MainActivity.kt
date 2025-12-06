@@ -1,6 +1,5 @@
 package com.example.touristguide
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,16 +10,27 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.touristguide.data.repository.TestRepository
+import com.example.touristguide.presentation.components.SightsMapItem
+import com.example.touristguide.presentation.viewModel.MapViewModel
+import com.example.touristguide.presentation.viewModel.SightsViewModel
 import com.example.touristguide.ui.theme.TouristGuideTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val mapViewModel = MapViewModel()
+        val repository = TestRepository()
+        val sightsViewModel = SightsViewModel(repository)
+
         enableEdgeToEdge()
         setContent {
-            val intent = Intent(this, MapActivity::class.java)
-            startActivity(intent)
+            TouristGuideTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    SightsMapItem(mapViewModel, sightsViewModel, Modifier.padding(innerPadding))
+                }
+            }
         }
     }
 }

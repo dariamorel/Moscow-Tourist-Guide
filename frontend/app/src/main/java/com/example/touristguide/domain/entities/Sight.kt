@@ -1,5 +1,7 @@
 package com.example.touristguide.domain.entities
 
+import org.osmdroid.util.GeoPoint
+
 data class Sight(
     val id: Long,
     val title: String,
@@ -9,13 +11,8 @@ data class Sight(
     val description: String,
     val bodyText: String,
     val url: String,
-    val coords: Coords,
+    val coords: GeoPoint,
     val subway: String,
     val images: List<String>,
     val categories: List<String>
-)
-
-data class Coords(
-    val latitude: Double,
-    val longitude: Double
 )
