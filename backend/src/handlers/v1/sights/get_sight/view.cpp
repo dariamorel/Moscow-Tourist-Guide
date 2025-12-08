@@ -47,7 +47,7 @@ std::string GetSightHandler::
     sight.lon = row["lon"].As<double>();
     sight.tag = row["tag"].As<std::string>();
     sight.short_desc = row["short_desc"].As<std::string>();
-    sight.desc = row["deesc"].As<std::string>();
+    sight.desc = row["desc"].As<std::string>();
     sight.timetable = row["timetable"].As<std::string>();
     sight.addr = row["addr"].As<std::string>();
     sight.phone = row["phone"].As<std::string>();
