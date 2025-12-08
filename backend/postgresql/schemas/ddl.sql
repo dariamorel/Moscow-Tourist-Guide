@@ -5,8 +5,8 @@ CREATE SCHEMA IF NOT EXISTS tour_guide;
 CREATE TABLE tour_guide.sights(
     id integer PRIMARY KEY,
     img text NOT NULL, 
-    lat integer NOT NULL,
-    lon integer NOT NULL,
+    lat numeric NOT NULL,
+    lon numeric NOT NULL,
     tag text,
     short_desc text NOT NULL,
     desc text NOT NULL,

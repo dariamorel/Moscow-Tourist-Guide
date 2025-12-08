@@ -240,9 +240,9 @@ components:
         img:
           type: string
         lat:
-          type: integer
+          type: numeric
         lon:
-          type: integer
+          type: numeric
         tag:
           type: array
           items:
