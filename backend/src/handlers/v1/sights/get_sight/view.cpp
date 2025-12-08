@@ -27,10 +27,10 @@ std::string GetSightHandler::
             .SetBody("Invalid sight Id");
     }
 
-    auto row = pg_cluster_->Execute(
+    auto result = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kMaster,
         "SELECT id, img, lat, lon, tag, short_desc, desc, timetable, addr, phone, subway "
-        "FROM tour_guide.sights WHERE id = $1 ",
+        "FROM tour_guide.sights ",
         sight_id
     ).AsSingleRow();
 

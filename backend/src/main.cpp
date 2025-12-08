@@ -12,6 +12,7 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "handlers/v1/sights/get_sight/view.hpp"
+#include "handlers/v1/sights/get_sights/view.hpp"
 
 #include "middleware/AuthMiddlewareFactory.hpp"
 #include "middleware/PipelineBuilder.hpp"
@@ -25,7 +26,8 @@ int main(int argc, char* argv[]) {
             .Append<userver::clients::dns::Component>()
             .Append<userver::server::handlers::TestsControl>()
             .Append<userver::components::Postgres>("postgres-db-1")
-            .Append<tour_guide::GetSightHandler>();
+            .Append<tour_guide::GetSightHandler>()
+            .Append<tour_guide::GetSightsHandler>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }
