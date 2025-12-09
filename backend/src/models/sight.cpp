@@ -9,15 +9,15 @@ Serialize(const Sight& sight, userver::formats::serialize::To<userver::formats::
     userver::formats::json::ValueBuilder builder;
     builder["id"] = sight.id;
     builder["img"] = sight.img;
-    builder["lat"] = sight.img;
-    builder["lon"] = sight.img;
-    builder["tag"] = sight.img;
-    builder["short_desc"] = sight.img;
-    builder["desc"] = sight.img;
-    builder["timetable"] = sight.img;
-    builder["addr"] = sight.img;
-    builder["phone"] = sight.img;
-    builder["subway"] = sight.img;
+    builder["lat"] = sight.lat;
+    builder["lon"] = sight.lon;
+    builder["tag"] = sight.tag;
+    builder["short_desc"] = sight.short_desc;
+    builder["desc"] = sight.desc;
+    builder["timetable"] = sight.timetable;
+    builder["addr"] = sight.addr;
+    builder["phone"] = sight.phone;
+    builder["subway"] = sight.subway;
 
     return builder.ExtractValue();
 }
