@@ -29,8 +29,9 @@ std::string GetSightHandler::
 
     auto result = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kMaster,
-        "SELECT id, img, lat, lon, tag, short_desc, desc, timetable, addr, phone, subway "
-        "FROM tour_guide.sights ",
+        "SELECT img, lat, lon, tag, short_desc, desc, timetable, addr, phone, subway "
+        "FROM tour_guide.sights "
+        "WHERE id = $1 ",
         sight_id
     ).AsSingleRow();
 
