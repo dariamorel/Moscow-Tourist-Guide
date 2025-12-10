@@ -13,6 +13,7 @@
 
 #include "handlers/v1/sights/get_sight/view.hpp"
 #include "handlers/v1/sights/get_sights/view.hpp"
+#include "handlers/v1/routes/get_routes/view.hpp"
 
 #include "middleware/AuthMiddlewareFactory.hpp"
 #include "middleware/PipelineBuilder.hpp"
@@ -27,7 +28,8 @@ int main(int argc, char* argv[]) {
             .Append<userver::server::handlers::TestsControl>()
             .Append<userver::components::Postgres>("postgres-db-1")
             .Append<tour_guide::GetSightHandler>()
-            .Append<tour_guide::GetSightsHandler>();
+            .Append<tour_guide::GetSightsHandler>()
+            .Append<tour_guide::GetRoutesHandler>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

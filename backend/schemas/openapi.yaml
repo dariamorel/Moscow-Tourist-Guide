@@ -41,9 +41,15 @@ paths:
                 items:
                   $ref: '#/components/schemas/Sight'
 
-  /routes:
+  /routes/{userId}:
     get:
-      summary: Получить все маршруты
+      summary: Получить все маршруты по user ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Список маршрутов
