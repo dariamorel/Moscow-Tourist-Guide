@@ -1,6 +1,7 @@
 DROP SCHEMA IF EXISTS tour_guide CASCADE;
 
 CREATE SCHEMA IF NOT EXISTS tour_guide;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE tour_guide.sights(
     id integer PRIMARY KEY,
