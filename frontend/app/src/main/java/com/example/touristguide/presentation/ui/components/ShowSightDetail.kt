@@ -26,11 +26,12 @@ import com.example.touristguide.domain.entities.Sight
 fun ShowSightDetail(
     sight: Sight,
     modifier: Modifier = Modifier,
-    button: @Composable (Modifier) -> Unit
+    button: @Composable (Modifier) -> Unit = {}
 ) {
     Box(
         modifier = modifier
-            .width(300.dp)
+            .fillMaxWidth()
+            .padding(30.dp)
             .wrapContentHeight()
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)

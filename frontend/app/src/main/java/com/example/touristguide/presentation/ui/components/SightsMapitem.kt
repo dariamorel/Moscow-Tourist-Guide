@@ -28,7 +28,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 fun SightsMapItem(
     mapViewModel: MapViewModel,
     sightsViewModel: SightsViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cardButton: @Composable (Modifier) -> Unit = {}
 ) {
     val sights by sightsViewModel.allSights.collectAsState()
     val selectedSight by sightsViewModel.selectedSight.collectAsState()
@@ -87,7 +88,8 @@ fun SightsMapItem(
                                 x = popupPosition.x + offsetX,
                                 y = popupPosition.y + offsetY
                             )
-                        }
+                        },
+                    button = cardButton
                 )
             }
         }
