@@ -192,6 +192,8 @@ paths:
           description: Успешный вход
         '401':
           description: Неверный логин или пароль
+        '404':
+          description: Недопустимый логин или пароль
 
   /achievements:
     get:
