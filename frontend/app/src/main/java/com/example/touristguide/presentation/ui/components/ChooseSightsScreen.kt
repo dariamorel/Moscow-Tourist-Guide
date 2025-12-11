@@ -4,13 +4,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.touristguide.presentation.viewModel.MapViewModel
@@ -60,9 +65,43 @@ fun ChooseSightsScreen(
                 .padding(innerPadding)
         ) { page ->
             when (page) {
-                0 -> ChooseSightsMapScreen(mapViewModel, sightsViewModel, Modifier.padding(innerPadding))
+                0 -> ChooseSightsMapScreen(mapViewModel, sightsViewModel, Modifier.padding(innerPadding)) { modifier ->
+                    var buttonText by remember { mutableStateOf("Добавить") }
 
-                1 -> ChooseSightsSearchScreen(sightsViewModel, Modifier.padding(innerPadding))
+                    Button(
+                        onClick = {
+                            when (buttonText) {
+                                "Добавить" -> buttonText = "Удалить"
+                                "Удалить" -> buttonText = "Добавить"
+                            }
+                        },
+                        modifier = modifier,
+                    ) {
+                        Text(
+                            text = buttonText,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+
+                1 -> ChooseSightsSearchScreen(sightsViewModel, Modifier.padding(innerPadding)) { modifier ->
+                    var buttonText by remember { mutableStateOf("Добавить") }
+
+                    Button(
+                        onClick = {
+                            when (buttonText) {
+                                "Добавить" -> buttonText = "Удалить"
+                                "Удалить" -> buttonText = "Добавить"
+                            }
+                        },
+                        modifier = modifier,
+                    ) {
+                        Text(
+                            text = buttonText,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
             }
         }
     }

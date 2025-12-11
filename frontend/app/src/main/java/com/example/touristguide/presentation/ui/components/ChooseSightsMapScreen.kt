@@ -32,7 +32,8 @@ import com.example.touristguide.presentation.viewModel.SightsViewModel
 fun ChooseSightsMapScreen(
     mapViewModel: MapViewModel,
     sightsViewModel: SightsViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cardButton: @Composable (Modifier) -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
@@ -43,39 +44,25 @@ fun ChooseSightsMapScreen(
             text = "Создание маршрута",
             fontSize = 20.sp,
             textAlign = TextAlign.Start,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
         SightsMapItem(
             mapViewModel,
             sightsViewModel,
             Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(30.dp))
-        ) @Composable { modifier ->
-            var buttonText by remember { mutableStateOf("Добавить") }
-
-            Button(
-                onClick = {
-                    when (buttonText) {
-                        "Добавить" -> buttonText = "Удалить"
-                        "Удалить" -> buttonText = "Добавить"
-                    }
-                },
-                modifier = modifier,
-            ) {
-                Text(
-                    text = buttonText,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
+                .clip(RoundedCornerShape(30.dp)),
+            cardButton = cardButton
+        )
         Button(
             onClick = {},
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier.align(Alignment.End),
         ) {
             Text(
                 text = "Создать маршрут",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }

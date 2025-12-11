@@ -1,6 +1,7 @@
 package com.example.touristguide.presentation.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.touristguide.domain.entities.Sight
@@ -17,6 +18,9 @@ class SightsViewModel(
     private val _allSights = MutableStateFlow<List<Sight>>(emptyList())
     val allSights: StateFlow<List<Sight>> = _allSights.asStateFlow()
 
+    private val _querySights = MutableStateFlow<List<Sight>>(emptyList())
+    val querySights = _querySights.asStateFlow()
+
     private val _selectedSight = MutableStateFlow<Sight?>(null)
     val selectedSight: StateFlow<Sight?> = _selectedSight.asStateFlow()
 
@@ -24,12 +28,22 @@ class SightsViewModel(
         getAllSights()
     }
 
-    fun getAllSights() {
+    private fun getAllSights() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _allSights.value = repository.getAllSights()
             } catch(e: Exception) {
                 Log.e(SIGHTS_TAG, "Error getting all sights: ${e.message}")
+            }
+        }
+    }
+
+    fun searchSights(query: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _querySights.value = _allSights.value.filter { sight ->
+                sight.title.contains(query, ignoreCase = true) ||
+                        sight.description.contains(query, ignoreCase = true) ||
+                        sight.bodyText.contains(query, ignoreCase = true)
             }
         }
     }
