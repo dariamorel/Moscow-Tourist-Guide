@@ -17,7 +17,7 @@ GetRoutesHandler::GetRoutesHandler(
 std::string GetRoutesHandler::
     HandleRequestThrow(const userver::server::http::HttpRequest& request, userver::server::request::RequestContext&)
         const {
-    auto user_id_str = request.GetPathArg("userId");
+    auto user_id_str = request.GetArg("userId");
     int user_id = 0;
     try {
         user_id = std::stoi(user_id_str);
