@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
+import com.example.touristguide.ui.theme.Orange
 import kotlinx.coroutines.launch
 
 private enum class Tabs(val option: String) {
@@ -42,7 +46,14 @@ fun ChooseSightsScreen(
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 containerColor = Color.Transparent,
-                modifier = Modifier.statusBarsPadding()
+                contentColor = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.statusBarsPadding(),
+                indicator = { tabPositions ->
+                    TabRowDefaults.SecondaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
             ) {
                 Tabs.entries.forEachIndexed { index, tab ->
                     Tab(
@@ -52,7 +63,9 @@ fun ChooseSightsScreen(
                                 pagerState.animateScrollToPage(index)
                             }
                         },
-                        text = { Text(tab.option, color = MaterialTheme.colorScheme.onBackground) }
+                        selectedContentColor = MaterialTheme.colorScheme.primaryContainer,
+                        unselectedContentColor = Color.Gray,
+                        text = { Text(tab.option) }
                     )
                 }
             }
@@ -76,6 +89,7 @@ fun ChooseSightsScreen(
                             }
                         },
                         modifier = modifier,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         Text(
                             text = buttonText,
@@ -95,6 +109,7 @@ fun ChooseSightsScreen(
                             }
                         },
                         modifier = modifier,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         Text(
                             text = buttonText,
