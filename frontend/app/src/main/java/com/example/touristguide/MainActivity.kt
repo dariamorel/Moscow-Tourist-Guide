@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.touristguide.data.repository.TestRepository
-import com.example.touristguide.presentation.components.SightsMapItem
+import com.example.touristguide.presentation.ui.components.SightsMapItem
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
 import com.example.touristguide.ui.theme.TouristGuideTheme
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            TouristGuideTheme {
+            TouristGuideTheme(dynamicColor = false) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     SightsMapItem(mapViewModel, sightsViewModel, Modifier.padding(innerPadding))
                 }

@@ -17,6 +17,9 @@ class SightsViewModel(
     private val _allSights = MutableStateFlow<List<Sight>>(emptyList())
     val allSights: StateFlow<List<Sight>> = _allSights.asStateFlow()
 
+    private val _selectedSight = MutableStateFlow<Sight?>(null)
+    val selectedSight: StateFlow<Sight?> = _selectedSight.asStateFlow()
+
     init {
         getAllSights()
     }
@@ -32,6 +35,11 @@ class SightsViewModel(
     }
 
     fun onSightSelected(sight: Sight) {
+        _selectedSight.value = sight
+    }
+
+    fun onDismissSightDetail() {
+        _selectedSight.value = null
     }
 
     companion object {
