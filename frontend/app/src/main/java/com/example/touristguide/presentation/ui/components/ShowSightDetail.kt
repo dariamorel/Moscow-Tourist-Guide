@@ -1,6 +1,8 @@
 package com.example.touristguide.presentation.ui.components
 
+import android.graphics.fonts.FontStyle
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,7 +54,7 @@ fun ShowSightDetail(
                     .background(Color.LightGray)
             )
             Text(
-                text = sight.title,
+                text = sight.title.replaceFirstChar { it.uppercase() },
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
@@ -65,6 +67,42 @@ fun ShowSightDetail(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 4.dp)
             )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 8.dp, horizontal = 24.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .padding(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (sight.timetable.isNotBlank()) {
+                    Text(
+                        text = sight.timetable,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                if (sight.subway.isNotBlank()) {
+                    Text(
+                        text = "м. ${sight.subway}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                if (sight.phone.isNotBlank()) {
+                    Text(
+                        text = "тел.: ${sight.phone}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
             button(Modifier.align(Alignment.End))
         }
     }

@@ -1,14 +1,17 @@
 package com.example.touristguide.presentation.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -21,6 +24,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,8 +47,10 @@ fun ChooseSightsSearchScreen(
     cardButton: @Composable (Modifier) -> Unit = {}
 ) {
     var query by remember { mutableStateOf("") }
+    var categoryQuery by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     val querySights by viewModel.querySights.collectAsState()
+    val categoriesList by viewModel.categoriesList.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
@@ -79,17 +85,44 @@ fun ChooseSightsSearchScreen(
             onExpandedChange = onActiveChange,
             modifier = Modifier
                 .fillMaxWidth(),
+            colors = SearchBarDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            ),
             content = {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(querySights.size) { index ->
-                        val sight = querySights[index]
-                        ShowSightDetail(
-                            sight = sight,
-                            modifier = Modifier.fillMaxWidth(),
-                            button = cardButton
-                        )
+                    if (query.isBlank()) {
+                        items(categoriesList.size) { index ->
+                            val category = categoriesList[index]
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        categoryQuery = category
+                                        query = category
+                                        viewModel.searchSightByCategory(category)
+                                    }
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
+                                Spacer(Modifier.width(16.dp))
+                                Text(
+                                    text = category.replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        }
+                    } else {
+                        items(querySights.size) { index ->
+                            val sight = querySights[index]
+                            ShowSightDetail(
+                                sight = sight,
+                                modifier = Modifier.fillMaxWidth(),
+                                button = cardButton
+                            )
+                        }
                     }
                 }
             }
