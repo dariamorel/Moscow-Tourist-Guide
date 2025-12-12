@@ -47,6 +47,7 @@ fun MapContainer(
         MapView(ctx).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
+            zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER)
         }
     }
 
