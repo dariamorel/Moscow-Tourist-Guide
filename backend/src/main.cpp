@@ -15,6 +15,7 @@
 #include "handlers/v1/sights/get_sights/view.hpp"
 #include "handlers/v1/routes/get_routes/view.hpp"
 #include "handlers/v1/routes/add_new_route/view.hpp"
+#include "handlers/v1/routes/update_route/view.hpp"
 
 #include "middleware/AuthMiddlewareFactory.hpp"
 #include "middleware/PipelineBuilder.hpp"
@@ -31,7 +32,8 @@ int main(int argc, char* argv[]) {
             .Append<tour_guide::GetSightHandler>()
             .Append<tour_guide::GetSightsHandler>()
             .Append<tour_guide::GetRoutesHandler>()
-            .Append<tour_guide::AddNewRouteHandler>();
+            .Append<tour_guide::AddNewRouteHandler>()
+            .Append<tour_guide::UpdateRouteHandler>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }
