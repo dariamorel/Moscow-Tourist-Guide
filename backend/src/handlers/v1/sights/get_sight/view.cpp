@@ -22,9 +22,8 @@ std::string GetSightHandler::
     try {
         sight_id = std::stoi(sight_id_str);
     } catch (...) {
-        return userver::server::http::HttpResponse{}
-            .SetStatus(userver::server::http::HttpStatus::kBadRequest)
-            .SetBody("Invalid sight Id");
+        request.SetResponseStatus(HttpStatus::kBadRequest);
+        return "";
     }
 
     auto result = pg_cluster_->Execute(
@@ -36,9 +35,8 @@ std::string GetSightHandler::
     ).AsSingleRow();
 
     if (row.IsEmpty()) {
-        return userver::server::http::HttpResponse{}
-            .SetStatus(userver::server::http::HttpStatus::kNotFound)
-            .SetBody("Sight not found");
+        request.SetResponseStatus(HttpStatus::kNotFound);
+        return "";
     }
 
     Sight sight;
@@ -54,6 +52,7 @@ std::string GetSightHandler::
     sight.phone = row["phone"].As<std::string>();
     sight.subway = row["subway"].As<std::string>();
 
+    request.SetResponseStatus(HttpStatus::kOk);
     return ToString(userver::formats::json::ValueBuilder{sight}.ExtractValue());
 }
 
