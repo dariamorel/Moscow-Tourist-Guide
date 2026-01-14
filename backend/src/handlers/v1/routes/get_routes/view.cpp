@@ -17,7 +17,7 @@ GetRoutesHandler::GetRoutesHandler(
 std::string GetRoutesHandler::
     HandleRequestThrow(const userver::server::http::HttpRequest& request, userver::server::request::RequestContext&)
         const {
-    auto user_id_str = request.GetArg("userId");
+    auto user_id_str = request.GetArg("user_id");
     int user_id = 0;
     try {
         user_id = std::stoi(user_id_str);
@@ -29,7 +29,7 @@ std::string GetRoutesHandler::
 
     auto request_result = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kMaster,
-        "SELECT id, order, planned_order, total_time, date "
+        "SELECT id, order, planned_order, total_time, date, status "
         "FROM tour_guide.routes "
         "WHERE user_id = $1 ",
         user_id
@@ -49,6 +49,7 @@ std::string GetRoutesHandler::
         route.user_id = user_id;
         route.total_time = row["total_time"].As<std::chrono::system_clock::duration>();
         route.date = row["date"].As<std::chrono::system_clock::time_point>();
+        route.status = row["status"].As<std::string>();
 
         routes.push_back(std::move(sight));
     }

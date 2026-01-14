@@ -45,7 +45,7 @@ paths:
     get:
       summary: Получить все маршруты по user ID
       parameters:
-        - name: userId
+        - name: user_id
           in: query
           required: true
           schema:
