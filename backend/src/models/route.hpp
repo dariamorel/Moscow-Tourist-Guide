@@ -15,6 +15,7 @@ struct Route {
     int user_id;
     std::chrono::system_clock::duration total_time;
     std::chrono::system_clock::time_point date;
+    std::string status;
 };
 
 userver::formats::json::Value Serialize(const Route& route, userver::formats::serialize::To<userver::formats::json::Value>);

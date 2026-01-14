@@ -13,6 +13,7 @@ Serialize(const Route& route, userver::formats::serialize::To<userver::formats::
     builder["user_id"] = route.user_id;
     builder["total_time"] = route.total_time;
     builder["date"] = route.date;
+    builder["status"] = route.status;
 
     return builder.ExtractValue();
 }

@@ -50,14 +50,15 @@ std::string AddNewRouteHandler::HandleRequestThrow(
     auto result = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kMaster,
         "INSERT INTO tour_guide.routes "
-        "(order, planned_order, user_id, total_time, date) "
+        "(order, planned_order, user_id, total_time, date, status) "
         "VALUES ($1, $2, $3, $4, $5) "
         "RETURNING id",
         order,
         planned_order,
         user_id,
         total_time,
-        date
+        date,
+        "in_progress"
     );
 
     if (result.IsEmpty()) {
@@ -72,6 +73,7 @@ std::string AddNewRouteHandler::HandleRequestThrow(
     route.user_id = user_id;
     route.total_time = total_time;
     route.date = date;
+    route.status = "in_progress";
 
     request.SetResponseStatus(HttpStatus::kCreated);
     userver::formats::json::ValueBuilder json{route};
