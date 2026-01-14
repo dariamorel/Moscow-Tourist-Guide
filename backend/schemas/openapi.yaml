@@ -282,6 +282,8 @@ components:
         date:
           type: string
           format: date-time
+        status:
+          type: string
 
     RouteInput:
       type: object
@@ -297,12 +299,15 @@ components:
         date:
           type: string
           format: date-time
+        status:
+          type: string
       required:
         - order
         - planned_order
         - user_id
         - total_time
         - date
+        - status
 
     User:
       type: object
