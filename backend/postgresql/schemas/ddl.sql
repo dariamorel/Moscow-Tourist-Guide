@@ -30,7 +30,8 @@ CREATE TABLE tour_guide.routes(
     planned_order integer NOT NULL,
     user_id integer NOT NULL,
     total_time time NOT NULL,
-    date timestamptz NOT NULL
+    date timestamptz NOT NULL,
+    status text NOT NULL
 );
 
 CREATE TABLE tour_guide.users(
