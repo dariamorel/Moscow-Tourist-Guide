@@ -34,7 +34,8 @@ std::string AddNewRouteHandler::HandleRequestThrow(
         !body.HasMember("planned_order") ||
         !body.HasMember("user_id") ||
         !body.HasMember("total_time") ||
-        !body.HasMember("date")) {
+        !body.HasMember("date") || 
+        !body.HasMember("status")) {
         request.SetResponseStatus(HttpStatus::kBadRequest);
         return "";
     }
@@ -46,6 +47,7 @@ std::string AddNewRouteHandler::HandleRequestThrow(
         body["total_time"].As<std::chrono::system_clock::duration>();
     const auto date =
         body["date"].As<std::chrono::system_clock::time_point>();
+    const int status = body["status"].As<std::string>();
 
     auto result = pg_cluster_->Execute(
         userver::storages::postgres::ClusterHostType::kMaster,
@@ -58,7 +60,7 @@ std::string AddNewRouteHandler::HandleRequestThrow(
         user_id,
         total_time,
         date,
-        "in_progress"
+        status
     );
 
     if (result.IsEmpty()) {
@@ -73,7 +75,7 @@ std::string AddNewRouteHandler::HandleRequestThrow(
     route.user_id = user_id;
     route.total_time = total_time;
     route.date = date;
-    route.status = "in_progress";
+    route.status = status;
 
     request.SetResponseStatus(HttpStatus::kCreated);
     userver::formats::json::ValueBuilder json{route};
