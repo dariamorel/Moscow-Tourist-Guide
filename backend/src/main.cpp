@@ -15,6 +15,7 @@
 #include "handlers/v1/sights/get_sights/view.hpp"
 #include "handlers/v1/routes/get_passed_routes/view.hpp"
 #include "handlers/v1/routes/get_declined_routes/view.hpp"
+#include "handlers/v1/routes/get_in_progress_routes/view.hpp"
 
 #include "middleware/AuthMiddlewareFactory.hpp"
 #include "middleware/PipelineBuilder.hpp"
@@ -31,7 +32,8 @@ int main(int argc, char* argv[]) {
             .Append<tour_guide::GetSightHandler>()
             .Append<tour_guide::GetSightsHandler>()
             .Append<tour_guide::GetPassedRoutesHandler>()
-            .Append<tour_guide::GetDeclinedRoutesHandler>();
+            .Append<tour_guide::GetDeclinedRoutesHandler>()
+            .Append<tour_guide::GetInProgressRoutesHandler>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }
