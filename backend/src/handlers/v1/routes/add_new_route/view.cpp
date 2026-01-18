@@ -19,14 +19,12 @@ std::string AddNewRouteHandler::HandleRequestThrow(
     const userver::server::http::HttpRequest& request,
     userver::server::request::RequestContext&
 ) const {
-    using userver::formats::json::FromString;
-    using userver::server::http::HttpStatus;
 
     userver::formats::json::Value body;
     try {
-        body = FromString(request.RequestBody());
+        body = userver::formats::json::FromString(request.RequestBody());
     } catch (...) {
-        request.SetResponseStatus(HttpStatus::kBadRequest);
+        request.SetResponseStatus(userver::server::http::HttpStatus::kBadRequest);
         return "";
     }
 
