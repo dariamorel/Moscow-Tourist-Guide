@@ -17,6 +17,7 @@
 #include "handlers/v1/routes/add_new_route/view.hpp"
 #include "handlers/v1/achievements/get_achievements/view.hpp"
 #include "handlers/v1/achievements/update_achievements/view.hpp"
+#include "handlers/v1/achievements/get_completed_achievements/view.hpp"
 
 #include "middleware/AuthMiddlewareFactory.hpp"
 #include "middleware/PipelineBuilder.hpp"
@@ -35,7 +36,8 @@ int main(int argc, char* argv[]) {
             .Append<tour_guide::GetRoutesHandler>()
             .Append<tour_guide::AddNewRouteHandler>()
             .Append<tour_guide::GetAchievementsHandler>()
-            .Append<tour_guide::UpdateAchievementsHandler>();
+            .Append<tour_guide::UpdateAchievementsHandler>()
+            .Append<tour_guide::GetCompletedAchievementsHandler>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }
