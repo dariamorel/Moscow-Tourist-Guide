@@ -1,0 +1,15 @@
+components_manager:
+  components:
+    server:
+      listener:
+        port: 8000
+        task_processor: main-task-processor
+
+    handler-get-sight:
+      path: /sights/{sightId}
+      method: GET
+      task_processor: main-task-processor
+
+    postgres-db-1:
+      dbconnection: postgresql://unused
+      blocking_task_processor: fs-task-processor

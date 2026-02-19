@@ -11,7 +11,13 @@ Serialize(const Sight& sight, userver::formats::serialize::To<userver::formats::
     builder["img"] = sight.img;
     builder["lat"] = sight.lat;
     builder["lon"] = sight.lon;
-    builder["tag"] = sight.tag;
+
+    userver::formats::json::ValueBuilder tag_builder;
+    for (auto t : sight.tag) {
+        tag_builder.PushBack(t);
+    }
+    builder["tag"] = tag_builder;
+
     builder["short_desc"] = sight.short_desc;
     builder["desc"] = sight.desc;
     builder["timetable"] = sight.timetable;

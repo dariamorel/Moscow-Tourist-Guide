@@ -11,7 +11,7 @@ GetSightHandler::GetSightHandler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& component_context
 )
-    : HttpHandlerBase(config, component_context),
+    : HttpHandlerBase(config, component_context, false),
       pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db-1").GetCluster()) {}
 
 std::string GetSightHandler::
@@ -22,7 +22,7 @@ std::string GetSightHandler::
     try {
         sight_id = std::stoi(sight_id_str);
     } catch (...) {
-        request.SetResponseStatus(HttpStatus::kBadRequest);
+        request.SetResponseStatus(userver::server::http::HttpStatus::kBadRequest);
         return "";
     }
 
@@ -32,19 +32,20 @@ std::string GetSightHandler::
         "FROM tour_guide.sights "
         "WHERE id = $1 ",
         sight_id
-    ).AsSingleRow();
+    );
 
-    if (row.IsEmpty()) {
-        request.SetResponseStatus(HttpStatus::kNotFound);
+    if (result.IsEmpty()) {
+        request.SetResponseStatus(userver::server::http::HttpStatus::kNotFound);
         return "";
     }
+    const auto row = result[0];
 
     Sight sight;
     sight.id = sight_id;
     sight.img = row["img"].As<std::string>();
     sight.lat = row["lat"].As<double>();
     sight.lon = row["lon"].As<double>();
-    sight.tag = row["tag"].As<std::string>();
+    sight.tag = row["tag"].As<std::vector<std::string>>();
     sight.short_desc = row["short_desc"].As<std::string>();
     sight.desc = row["desc"].As<std::string>();
     sight.timetable = row["timetable"].As<std::string>();
@@ -52,7 +53,7 @@ std::string GetSightHandler::
     sight.phone = row["phone"].As<std::string>();
     sight.subway = row["subway"].As<std::string>();
 
-    request.SetResponseStatus(HttpStatus::kOk);
+    request.SetResponseStatus(userver::server::http::HttpStatus::kOk);
     return ToString(userver::formats::json::ValueBuilder{sight}.ExtractValue());
 }
 

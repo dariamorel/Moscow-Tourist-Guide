@@ -7,7 +7,7 @@ CREATE TABLE tour_guide.sights(
     img text NOT NULL, 
     lat numeric NOT NULL,
     lon numeric NOT NULL,
-    tag text,
+    tag text[],
     short_desc text NOT NULL,
     desc text NOT NULL,
     timetable text,

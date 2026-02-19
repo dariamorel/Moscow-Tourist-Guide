@@ -11,7 +11,7 @@ GetSightsHandler::GetSightsHandler(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& component_context
 )
-    : HttpHandlerBase(config, component_context),
+    : HttpHandlerBase(config, component_context, false),
       pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db-1").GetCluster()) {}
 
 std::string GetSightsHandler::
@@ -24,20 +24,19 @@ std::string GetSightsHandler::
     );
 
     if (request_result.IsEmpty()) {
-        return userver::server::http::HttpResponse{}
-            .SetStatus(userver::server::http::HttpStatus::kNotFound)
-            .SetBody("Sight not found");
+        request.SetResponseStatus(userver::server::http::HttpStatus::kNotFound);
+        return "";
     }
 
     std::vector<Sight> sights;
-    sights.reserve(request_result.size());
+    sights.reserve(request_result.Size());
     for (auto row : request_result) {
         Sight sight;
         sight.id = row["id"].As<int>();
         sight.img = row["img"].As<std::string>();
         sight.lat = row["lat"].As<double>();
         sight.lon = row["lon"].As<double>();
-        sight.tag = row["tag"].As<std::string>();
+        sight.tag = row["tag"].As<std::vector<std::string>>();
         sight.short_desc = row["short_desc"].As<std::string>();
         sight.desc = row["desc"].As<std::string>();
         sight.timetable = row["timetable"].As<std::string>();
@@ -49,10 +48,8 @@ std::string GetSightsHandler::
     }
 
     userver::formats::json::ValueBuilder json;
-    auto& arr = json["sights"];
-
     for (const auto& sight : sights) {
-        arr.PushBack(userver::formats::json::ValueBuilder{sight});
+        json["sights"].PushBack(userver::formats::json::ValueBuilder{sight});
     }
 
     return ToString(json.ExtractValue());

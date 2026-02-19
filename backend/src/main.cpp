@@ -14,9 +14,6 @@
 #include "handlers/v1/sights/get_sight/view.hpp"
 #include "handlers/v1/sights/get_sights/view.hpp"
 
-#include "middleware/AuthMiddlewareFactory.hpp"
-#include "middleware/PipelineBuilder.hpp"
-
 int main(int argc, char* argv[]) {
     auto component_list =
         userver::components::MinimalServerComponentList()

@@ -13,7 +13,7 @@ class GetSightsHandler final : public userver::server::handlers::HttpHandlerBase
 public:
     static constexpr std::string_view kName = "get-sights";
 
-    GetSightHandler(const userver::components::ComponentConfig& config,
+    GetSightsHandler(const userver::components::ComponentConfig& config,
         const userver::components::ComponentContext& component_context);
 
     std::string HandleRequestThrow(const userver::server::http::HttpRequest& request,
