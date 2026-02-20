@@ -12,6 +12,9 @@ services:
       POSTGRES_DB: test_db
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
+    cap_add:
+      - SYS_PTRACE
+      - IPC_LOCK
 
   postgres:
     image: postgres:15

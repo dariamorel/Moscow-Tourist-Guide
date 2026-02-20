@@ -3,12 +3,16 @@ version: "3.9"
 services:
   postgres:
     image: postgres:15
+    container_name: test_postgres_container
     environment:
       POSTGRES_DB: test
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
     ports:
       - "5432:5432"
+    volumes:
+      # Важно: кладем файл в корень initdb.d
+      - ./postgresql/schemas/ddl.sql:/docker-entrypoint-initdb.d/ddl.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test"]
       interval: 1s
