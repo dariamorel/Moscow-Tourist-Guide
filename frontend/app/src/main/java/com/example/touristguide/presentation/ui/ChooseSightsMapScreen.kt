@@ -56,7 +56,7 @@ fun ChooseSightsMapScreen(
             onClick = {
                 sightsViewModel.createRoute()
                 navController.navigate(Screens.MY_ROUTES.title) },
-            modifier = Modifier.align(Alignment.End),
+            modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
         ) {
             Text(

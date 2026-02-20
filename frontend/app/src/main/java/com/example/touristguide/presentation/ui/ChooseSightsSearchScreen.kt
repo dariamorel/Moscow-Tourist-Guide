@@ -17,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
@@ -52,95 +53,106 @@ fun ChooseSightsSearchScreen(
     val querySights by viewModel.querySights.collectAsState()
     val categoriesList by viewModel.categoriesList.collectAsState()
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val onActiveChange = { expanded: Boolean -> active = expanded }
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = "Создание маршрута",
-            fontSize = 20.sp,
-            textAlign = TextAlign.Start,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        SearchBar(
-            inputField = {
-                SearchBarDefaults.InputField(
-                    query = query,
-                    onQueryChange = { 
-                        query = it
-                        viewModel.searchSights(it)
-                    },
-                    onSearch = { active = false },
-                    expanded = active,
-                    onExpandedChange = onActiveChange,
-                    placeholder = { Text("Поиск достопримечательностей") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
+    Scaffold(
+        bottomBar = {
+            Button(
+                onClick = {
+                    viewModel.createRoute()
+                    navController.navigate(Screens.MY_ROUTES.title)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
-            },
-            expanded = active,
-            onExpandedChange = onActiveChange,
-            modifier = Modifier
-                .fillMaxWidth(),
-            colors = SearchBarDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            ),
-            content = {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (query.isBlank()) {
-                        items(categoriesList.size) { index ->
-                            val category = categoriesList[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        categoryQuery = category
-                                        query = category
-                                        viewModel.searchSightByCategory(category)
-                                    }
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
-                                Spacer(Modifier.width(16.dp))
-                                Text(
-                                    text = category.replaceFirstChar { it.uppercase() },
-                                    style = MaterialTheme.typography.bodyLarge
+            ) {
+                Text(
+                    text = "Создать маршрут",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(20.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val onActiveChange = { expanded: Boolean -> active = expanded }
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Создание маршрута",
+                fontSize = 20.sp,
+                textAlign = TextAlign.Start,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            SearchBar(
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = query,
+                        onQueryChange = {
+                            query = it
+                            viewModel.searchSights(it)
+                        },
+                        onSearch = { active = false },
+                        expanded = active,
+                        onExpandedChange = onActiveChange,
+                        placeholder = { Text("Поиск достопримечательностей") },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
+                    )
+                },
+                expanded = active,
+                onExpandedChange = onActiveChange,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = SearchBarDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                content = {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (query.isBlank()) {
+                            items(categoriesList.size) { index ->
+                                val category = categoriesList[index]
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            categoryQuery = category
+                                            query = category
+                                            viewModel.searchSightByCategory(category)
+                                        }
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = null,
+                                        tint = Color.Gray
+                                    )
+                                    Spacer(Modifier.width(16.dp))
+                                    Text(
+                                        text = category.replaceFirstChar { it.uppercase() },
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                            }
+                        } else {
+                            items(querySights.size) { index ->
+                                val sight = querySights[index]
+                                ShowSightDetail(
+                                    sight = sight,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    button = cardButton
                                 )
                             }
                         }
-                    } else {
-                        items(querySights.size) { index ->
-                            val sight = querySights[index]
-                            ShowSightDetail(
-                                sight = sight,
-                                modifier = Modifier.fillMaxWidth(),
-                                button = cardButton
-                            )
-                        }
                     }
                 }
-            }
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Button(
-            onClick = {
-                viewModel.createRoute()
-                navController.navigate(Screens.MY_ROUTES.title) },
-            modifier = Modifier
-                .padding(20.dp)
-                .align(Alignment.End),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        ) {
-            Text(
-                text = "Создать маршрут",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
