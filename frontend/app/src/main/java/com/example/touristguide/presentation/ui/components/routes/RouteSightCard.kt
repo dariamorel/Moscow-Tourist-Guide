@@ -5,19 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,15 +42,14 @@ fun RouteSightCard(
 
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(30.dp)
-            .wrapContentHeight()
+            .fillMaxSize()
+            .padding(12.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
             .padding(8.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -63,7 +59,7 @@ fun RouteSightCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp)
+                    .height(220.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.LightGray)
             )
@@ -92,22 +88,26 @@ fun RouteSightCard(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            Text(
-                text = sight.bodyText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Start,
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 150.dp)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 8.dp)
-            )
+                    .weight(1f)
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = sight.bodyText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 8.dp)
+                )
+            }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()
                     .padding(vertical = 8.dp, horizontal = 24.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainer)
@@ -141,13 +141,6 @@ fun RouteSightCard(
                 }
             }
 
-            Button(
-                onClick = onPassedClick,
-                modifier = Modifier.align(Alignment.End),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-            ) {
-                Text("Пройдено")
-            }
         }
     }
 }

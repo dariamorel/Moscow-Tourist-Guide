@@ -64,8 +64,20 @@ fun RouteScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+        val color = when (route.status) {
+            Route.Status.NOT_STARTED -> Color.Gray
+            Route.Status.IN_PROGRESS -> Color.Yellow
+            Route.Status.DECLINED -> Color.Red
+            Route.Status.PASSED -> Color.Green
+        }
         Text(
-            text = "\uD83D\uDD52 ${route.totalTime?.format(DateTimeFormatter.ofPattern("hh ч mm мин"))}",
+            text = route.status.title,
+            style = MaterialTheme.typography.titleMedium,
+            color = color,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "\uD83D\uDD52 Общая длительность - ${route.totalTime?.format(DateTimeFormatter.ofPattern("hh ч mm мин"))}",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -94,11 +106,12 @@ fun RouteScreen(
 
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxSize(),
             pageSize = PageSize.Fill,
             pageSpacing = 14.dp
         ) { page ->
-            // Last page: celebration screen.
             if (page == sights.size) {
                 RouteCompletedPage(modifier = Modifier.fillMaxWidth())
             } else {
@@ -106,14 +119,13 @@ fun RouteScreen(
                     (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
                 val distance = pageOffset.absoluteValue.coerceIn(0f, 1f)
 
-                // Center card: bigger + more opaque. Side cards: smaller + faded + a bit shifted.
                 val scale = 0.92f + (1f - distance) * 0.08f
                 val alpha = 0.55f + (1f - distance) * 0.45f
 
                 RouteSightCard(
                     sight = sights[page],
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .graphicsLayer {
                             this.alpha = alpha
                             scaleX = scale
@@ -196,7 +208,7 @@ private fun RouteCompletedPage(modifier: Modifier = Modifier) {
                 }
             )
             Text(
-                text = "Маршрут пройден",
+                text = "Маршрут пройден!",
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 6.dp)
@@ -215,7 +227,6 @@ private data class ConfettiParticle(
 
 @Composable
 private fun rememberConfettiParticles(): List<ConfettiParticle> {
-    // Stable per composition (so animation looks consistent).
     return androidx.compose.runtime.remember {
         val rnd = Random(42)
         val palette = listOf(
