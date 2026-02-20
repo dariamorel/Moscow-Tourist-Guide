@@ -21,12 +21,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.touristguide.Screens
 import com.example.touristguide.presentation.ui.components.routes.RouteItem
+import com.example.touristguide.presentation.viewModel.RouteViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
 
 @Composable
 fun MyRoutesScreen(
     navController: NavController,
-    viewModel: SightsViewModel,
+    viewModel: RouteViewModel,
     modifier: Modifier = Modifier
 ) {
     val allRoutes by viewModel.allRoutes.collectAsState()

@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.touristguide.domain.entities.Route
+import com.example.touristguide.ui.theme.BrightGreen
+import com.example.touristguide.ui.theme.BrightOrange
 
 @Composable
 fun RouteItem(
@@ -69,10 +71,16 @@ fun RouteItem(
                 color = Color.Black,
                 textAlign = TextAlign.Center,
             )
+            val color = when (route.status) {
+                Route.Status.NOT_STARTED -> Color.Gray
+                Route.Status.IN_PROGRESS -> BrightOrange
+                Route.Status.DECLINED -> Color.Red
+                Route.Status.PASSED -> BrightGreen
+            }
             Text(
                 text = route.status.title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = color,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.End)
             )

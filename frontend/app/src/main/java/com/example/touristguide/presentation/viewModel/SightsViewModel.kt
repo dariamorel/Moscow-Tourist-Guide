@@ -38,13 +38,6 @@ class SightsViewModel(
 
     private val newRouteOrder = mutableListOf<Sight>()
 
-    val allRoutes = repository.allRoutes.map { routes ->
-        routes.sorted()
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Lazily,
-        initialValue = emptyList()
-    )
 
     init {
         getAllSights()
@@ -59,34 +52,6 @@ class SightsViewModel(
                 _sightStatuses.value = _allSights.value.associate { sight -> sight.id to false }
             } catch(e: Exception) {
                 Log.e(SIGHTS_TAG, "Error getting all sights: ${e.message}")
-            }
-        }
-    }
-
-    fun getRouteById(id: Int) = allRoutes.value.find { route -> route.id == id }
-
-    fun doneSight(sightIdx: Int, route: Route) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                repository.updateRoute(
-                    route.id, route.copy(
-                        isPassed = route.isPassed.toMutableList().apply { this[sightIdx] = true }
-                    )
-                )
-            } catch (e: Exception) {
-            }
-        }
-    }
-
-    fun undoneSight(sightIdx: Int, route: Route) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                repository.updateRoute(
-                    route.id, route.copy(
-                        isPassed = route.isPassed.toMutableList().apply { this[sightIdx] = false }
-                    )
-                )
-            } catch (e: Exception) {
             }
         }
     }
@@ -113,6 +78,7 @@ class SightsViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             repository.addNewRoute(newRouteOrder.toMutableList())
             newRouteOrder.clear()
+            _sightStatuses.value = emptyMap()
         }
     }
 

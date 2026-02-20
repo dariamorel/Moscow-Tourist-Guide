@@ -12,6 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
@@ -25,6 +27,7 @@ import com.example.touristguide.presentation.ui.ChooseSightsScreen
 import com.example.touristguide.presentation.ui.MyRoutesScreen
 import com.example.touristguide.presentation.ui.RouteScreen
 import com.example.touristguide.presentation.viewModel.MapViewModel
+import com.example.touristguide.presentation.viewModel.RouteViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
 import com.example.touristguide.ui.theme.TouristGuideTheme
 
@@ -36,6 +39,7 @@ class MainActivity : ComponentActivity() {
         val mapViewModel = MapViewModel()
         val repository = TestRepository()
         val sightsViewModel = SightsViewModel(repository)
+        val routeViewModel = RouteViewModel(repository)
 
         enableEdgeToEdge()
         setContent {
@@ -44,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background
                 ) { innerPadding ->
-                    MainScreen(sightsViewModel, mapViewModel, Modifier.padding(innerPadding))
+                    MainScreen(sightsViewModel, mapViewModel, routeViewModel, Modifier.padding(innerPadding))
                 }
             }
         }
@@ -61,6 +65,7 @@ enum class Screens(val title: String) {
 fun MainScreen(
     sightsViewModel: SightsViewModel,
     mapViewModel: MapViewModel,
+    routeViewModel: RouteViewModel,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -69,7 +74,7 @@ fun MainScreen(
         composable(Screens.MY_ROUTES.title) {
             MyRoutesScreen(
                 navController = navController,
-                viewModel = sightsViewModel,
+                viewModel = routeViewModel,
                 modifier = modifier
             )
         }
@@ -92,10 +97,11 @@ fun MainScreen(
             )
             ) { backStackEntry ->
             val routeId = backStackEntry.arguments?.getInt("routeId") ?: 0
-            val route = sightsViewModel.getRouteById(routeId) ?: Route()
+            val routes by routeViewModel.allRoutes.collectAsState()
+            val route = routes.find { it.id == routeId } ?: Route()
             RouteScreen(
                 route = route,
-                sightsViewModel = sightsViewModel,
+                routeViewModel = routeViewModel,
                 modifier = modifier
             )
         }

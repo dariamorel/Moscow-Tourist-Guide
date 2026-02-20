@@ -20,10 +20,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.pager.PageSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,11 +37,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.touristguide.Screens
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.presentation.ui.components.routes.RouteSightCard
+import com.example.touristguide.presentation.viewModel.RouteViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
+import com.example.touristguide.ui.theme.BrightGreen
+import com.example.touristguide.ui.theme.BrightOrange
+import com.example.touristguide.ui.theme.Orange
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -44,14 +54,24 @@ import java.time.format.FormatStyle
 @Composable
 fun RouteScreen(
     route: Route,
-    sightsViewModel: SightsViewModel,
+    routeViewModel: RouteViewModel,
     modifier: Modifier = Modifier
 ) {
     val sights = route.order
     val pagerState = rememberPagerState(
         initialPage = 0,
-        pageCount = { if (sights.isEmpty()) 1 else sights.size + 1 } // +1 final "completed" page
+        pageCount = { if (sights.isEmpty()) 1 else sights.size + 1 }
     )
+    val currentPage by remember { derivedStateOf { pagerState.currentPage } }
+
+    LaunchedEffect(currentPage, route.id) {
+        when (currentPage) {
+            0 -> routeViewModel.changeRouteStatus(Route.Status.NOT_STARTED, route)
+            sights.size -> { routeViewModel.changeRouteStatus(Route.Status.PASSED, route) }
+            else -> { routeViewModel.changeRouteStatus(Route.Status.IN_PROGRESS, route) }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -66,9 +86,9 @@ fun RouteScreen(
         )
         val color = when (route.status) {
             Route.Status.NOT_STARTED -> Color.Gray
-            Route.Status.IN_PROGRESS -> Color.Yellow
+            Route.Status.IN_PROGRESS -> BrightOrange
             Route.Status.DECLINED -> Color.Red
-            Route.Status.PASSED -> Color.Green
+            Route.Status.PASSED -> BrightGreen
         }
         Text(
             text = route.status.title,
@@ -132,8 +152,8 @@ fun RouteScreen(
                             scaleY = scale
                             translationX = pageOffset * size.width * 0.08f
                         },
-                    onPassedClick = { sightsViewModel.doneSight(page, route) },
-                    onDeclinedClick = { sightsViewModel.undoneSight(page, route) }
+                    onPassedClick = { routeViewModel.changeSightStatus(true,page, route) },
+                    onDeclinedClick = { routeViewModel.changeSightStatus(false,page, route) }
                 )
             }
         }
