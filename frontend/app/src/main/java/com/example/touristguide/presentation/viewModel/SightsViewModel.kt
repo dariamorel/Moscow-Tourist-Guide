@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -22,6 +23,9 @@ class SightsViewModel(
 ): ViewModel() {
     private val _allSights = MutableStateFlow<List<Sight>>(emptyList())
     val allSights: StateFlow<List<Sight>> = _allSights.asStateFlow()
+
+    private var _sightStatuses = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
+    val sightStatuses = _sightStatuses.asStateFlow()
 
     private val _querySights = MutableStateFlow<List<Sight>>(listOf())
     val querySights = _querySights.asStateFlow()
@@ -52,6 +56,7 @@ class SightsViewModel(
             try {
                 _allSights.value = repository.getAllSights()
                 _querySights.value = _allSights.value
+                _sightStatuses.value = _allSights.value.associate { sight -> sight.id to false }
             } catch(e: Exception) {
                 Log.e(SIGHTS_TAG, "Error getting all sights: ${e.message}")
             }
@@ -60,10 +65,20 @@ class SightsViewModel(
 
     fun addSightToRoute(sight: Sight) {
         newRouteOrder.add(sight)
+        _sightStatuses.update { map ->
+            map.toMutableMap().apply {
+                this[sight.id] = true
+            }
+        }
     }
 
     fun removeSightFromRoute(sight: Sight) {
         newRouteOrder.remove(sight)
+        _sightStatuses.update { map ->
+            map.toMutableMap().apply {
+                this[sight.id] = false
+            }
+        }
     }
 
     fun createRoute() {

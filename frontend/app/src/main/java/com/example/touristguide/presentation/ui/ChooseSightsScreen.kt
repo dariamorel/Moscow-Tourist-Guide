@@ -1,5 +1,6 @@
 package com.example.touristguide.presentation.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -14,6 +15,8 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,9 +25,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
+import kotlinx.coroutines.flow.compose
 import kotlinx.coroutines.launch
+import kotlin.collections.getValue
 
 private enum class Tabs(val option: String) {
     MAP("Карта"),
@@ -40,6 +46,7 @@ fun ChooseSightsScreen(
 ) {
     val pagerState = rememberPagerState(initialPage = 1, pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
+    val sightStatuses by sightsViewModel.sightStatuses.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -78,67 +85,46 @@ fun ChooseSightsScreen(
             modifier = Modifier
                 .padding(innerPadding)
         ) { page ->
+            val cardButton = @Composable { modifier: Modifier, sight: Sight ->
+                val status = sightStatuses[sight.id] ?: false
+                val buttonText =  if (!status) "Добавить" else "Удалить"
+
+                Button(
+                    onClick = {
+                        when (buttonText) {
+                            "Добавить" -> {
+                                sightsViewModel.addSightToRoute(sight)
+                            }
+                            "Удалить" -> {
+                                sightsViewModel.removeSightFromRoute(sight)
+                            }
+                        }
+                    },
+                    modifier = modifier,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Text(
+                        text = buttonText,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+
             when (page) {
                 0 -> ChooseSightsMapScreen(
                     navController,
                     mapViewModel,
                     sightsViewModel,
-                    Modifier.padding(innerPadding)
-                ) { modifier, sight ->
-                    var buttonText by remember { mutableStateOf("Добавить") }
-
-                    Button(
-                        onClick = {
-                            when (buttonText) {
-                                "Добавить" -> {
-                                    buttonText = "Удалить"
-                                    sightsViewModel.addSightToRoute(sight)
-                                }
-                                "Удалить" -> {
-                                    buttonText = "Добавить"
-                                    sightsViewModel.removeSightFromRoute(sight)
-                                }
-                            }
-                        },
-                        modifier = modifier,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                    ) {
-                        Text(
-                            text = buttonText,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
+                    Modifier.padding(innerPadding),
+                    cardButton = cardButton
+                )
 
                 1 -> ChooseSightsSearchScreen(
                     navController,
                     sightsViewModel,
-                    Modifier.padding(innerPadding)
-                ) { modifier, sight ->
-                    var buttonText by remember { mutableStateOf("Добавить") }
-
-                    Button(
-                        onClick = {
-                            when (buttonText) {
-                                "Добавить" -> {
-                                    buttonText = "Удалить"
-                                    sightsViewModel.addSightToRoute(sight)
-                                }
-                                "Удалить" -> {
-                                    buttonText = "Добавить"
-                                    sightsViewModel.removeSightFromRoute(sight)
-                                }
-                            }
-                        },
-                        modifier = modifier,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                    ) {
-                        Text(
-                            text = buttonText,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
+                    Modifier.padding(innerPadding),
+                    cardButton = cardButton
+                )
             }
         }
     }
