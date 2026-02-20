@@ -153,7 +153,7 @@ class TestRepository: Repository {
         changedRoutes.add(Route(
             id = id,
             order = order,
-            orderPassed = emptyList(),
+            isPassed = List(order.size) { false },
             totalTime = LocalTime.of(0, 0),
             date = LocalDateTime.now(),
             status = Route.Status.NOT_STARTED

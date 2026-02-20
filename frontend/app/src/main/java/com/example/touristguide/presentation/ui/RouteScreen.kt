@@ -13,6 +13,8 @@ import androidx.compose.foundation.pager.PageSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -21,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.absoluteValue
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.presentation.ui.components.routes.RouteSightCard
+import com.example.touristguide.presentation.viewModel.SightsViewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -28,10 +31,12 @@ import java.time.format.FormatStyle
 @Composable
 fun RouteScreen(
     route: Route,
+    sightsViewModel: SightsViewModel,
     modifier: Modifier = Modifier
 ) {
     val sights = route.order
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { sights.size.coerceAtLeast(1) })
+    val allRoutes by sightsViewModel.allRoutes.collectAsState()
 
     Column(
         modifier = modifier
@@ -46,7 +51,7 @@ fun RouteScreen(
             textAlign = TextAlign.Center
         )
         Text(
-            text = "\uD83D\uDD52 ${route.totalTime}",
+            text = "\uD83D\uDD52 ${route.totalTime?.format(DateTimeFormatter.ofPattern("hh ч mm мин"))}",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -95,7 +100,9 @@ fun RouteScreen(
                         scaleX = scale
                         scaleY = scale
                         translationX = pageOffset * size.width * 0.08f
-                    }
+                    },
+                onPassedClick = { sightsViewModel.doneSight(page, route) },
+                onDeclinedClick = { sightsViewModel.undoneSight(page, route) }
             )
         }
     }

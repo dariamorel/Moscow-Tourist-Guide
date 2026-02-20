@@ -65,6 +65,32 @@ class SightsViewModel(
 
     fun getRouteById(id: Int) = allRoutes.value.find { route -> route.id == id }
 
+    fun doneSight(sightIdx: Int, route: Route) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.updateRoute(
+                    route.id, route.copy(
+                        isPassed = route.isPassed.toMutableList().apply { this[sightIdx] = true }
+                    )
+                )
+            } catch (e: Exception) {
+            }
+        }
+    }
+
+    fun undoneSight(sightIdx: Int, route: Route) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.updateRoute(
+                    route.id, route.copy(
+                        isPassed = route.isPassed.toMutableList().apply { this[sightIdx] = false }
+                    )
+                )
+            } catch (e: Exception) {
+            }
+        }
+    }
+
     fun addSightToRoute(sight: Sight) {
         newRouteOrder.add(sight)
         _sightStatuses.update { map ->

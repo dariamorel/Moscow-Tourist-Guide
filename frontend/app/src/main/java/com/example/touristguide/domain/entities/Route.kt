@@ -8,7 +8,7 @@ import java.time.LocalTime
 data class Route(
     val id: Int = 0,
     val order: List<Sight> = emptyList(),
-    val orderPassed: List<Sight> = emptyList(),
+    val isPassed: List<Boolean> = emptyList(),
     val totalTime: LocalTime? = null,
     val date: LocalDateTime? = null,
     val status: Status = Status.NOT_STARTED
