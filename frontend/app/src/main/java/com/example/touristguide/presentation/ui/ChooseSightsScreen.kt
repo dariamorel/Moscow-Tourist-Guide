@@ -1,8 +1,7 @@
 package com.example.touristguide.presentation.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
@@ -15,22 +14,16 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
-import kotlinx.coroutines.flow.compose
 import kotlinx.coroutines.launch
-import kotlin.collections.getValue
 
 private enum class Tabs(val option: String) {
     MAP("Карта"),
@@ -50,12 +43,13 @@ fun ChooseSightsScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0),
+        modifier = modifier,
         topBar = {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.statusBarsPadding(),
                 indicator = { tabPositions ->
                     TabRowDefaults.SecondaryIndicator(
                         modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
@@ -115,14 +109,14 @@ fun ChooseSightsScreen(
                     navController,
                     mapViewModel,
                     sightsViewModel,
-                    Modifier.padding(innerPadding),
+                    Modifier,
                     cardButton = cardButton
                 )
 
                 1 -> ChooseSightsSearchScreen(
                     navController,
                     sightsViewModel,
-                    Modifier.padding(innerPadding),
+                    Modifier,
                     cardButton = cardButton
                 )
             }

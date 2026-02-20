@@ -3,23 +3,24 @@ package com.example.touristguide.presentation.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,12 +48,13 @@ fun ChooseSightsSearchScreen(
     cardButton: @Composable (Modifier, Sight) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
-    var categoryQuery by remember { mutableStateOf("") }
-    var active by remember { mutableStateOf(false) }
     val querySights by viewModel.querySights.collectAsState()
     val categoriesList by viewModel.categoriesList.collectAsState()
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0),
+        modifier = modifier,
         bottomBar = {
             Button(
                 onClick = {
@@ -62,7 +63,7 @@ fun ChooseSightsSearchScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
@@ -76,84 +77,106 @@ fun ChooseSightsSearchScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(20.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val onActiveChange = { expanded: Boolean -> active = expanded }
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = "Создание маршрута",
                 fontSize = 20.sp,
-                textAlign = TextAlign.Start,
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            SearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = query,
-                        onQueryChange = {
-                            query = it
-                            viewModel.searchSights(it)
-                        },
-                        onSearch = { active = false },
-                        expanded = active,
-                        onExpandedChange = onActiveChange,
-                        placeholder = { Text("Поиск достопримечательностей") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
-                    )
+
+            OutlinedTextField(
+                value = query,
+                onValueChange = {
+                    query = it
+                    viewModel.searchSights(it)
                 },
-                expanded = active,
-                onExpandedChange = onActiveChange,
                 modifier = Modifier
-                    .fillMaxWidth(),
-                colors = SearchBarDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                content = {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (query.isBlank()) {
-                            items(categoriesList.size) { index ->
-                                val category = categoriesList[index]
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            categoryQuery = category
-                                            query = category
-                                            viewModel.searchSightByCategory(category)
-                                        }
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        Icons.Default.Search,
-                                        contentDescription = null,
-                                        tint = Color.Gray
-                                    )
-                                    Spacer(Modifier.width(16.dp))
-                                    Text(
-                                        text = category.replaceFirstChar { it.uppercase() },
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                }
+                    .fillMaxWidth()
+                    .padding(top = 2.dp),
+                singleLine = true,
+                placeholder = { Text("Поиск достопримечательностей") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
+                trailingIcon = {
+                    if (query.isNotBlank()) {
+                        IconButton(
+                            onClick = {
+                                query = ""
+                                viewModel.searchSights("")
                             }
-                        } else {
-                            items(querySights.size) { index ->
-                                val sight = querySights[index]
-                                ShowSightDetail(
-                                    sight = sight,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    button = cardButton
-                                )
-                            }
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = "Очистить")
                         }
                     }
                 }
             )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (query.isBlank()) {
+                    items(categoriesList.size) { index ->
+                        val category = categoriesList[index]
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    text = category.replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = "Показать места этой категории",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            leadingContent = {
+                                Icon(Icons.Default.Search, contentDescription = null)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    query = category
+                                    viewModel.searchSightByCategory(category)
+                                }
+                        )
+                    }
+                } else {
+                    if (querySights.isEmpty()) {
+                        item {
+                            Text(
+                                text = "Ничего не найдено",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp)
+                            )
+                        }
+                    } else {
+                        items(querySights.size) { index ->
+                            val sight = querySights[index]
+                            ShowSightDetail(
+                                sight = sight,
+                                modifier = Modifier.fillMaxWidth(),
+                                button = cardButton
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

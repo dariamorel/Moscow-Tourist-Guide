@@ -40,7 +40,7 @@ fun ChooseSightsMapScreen(
             modifier = Modifier.fillMaxWidth(),
             text = "Создание маршрута",
             fontSize = 20.sp,
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )

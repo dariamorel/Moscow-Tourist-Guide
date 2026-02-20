@@ -14,7 +14,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.touristguide.Screens
 import com.example.touristguide.presentation.ui.components.routes.RouteItem
@@ -30,18 +32,25 @@ fun MyRoutesScreen(
 
     Column(
         modifier.fillMaxWidth().padding(30.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = "Мои маршруты",
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Button(
             onClick = { navController.navigate(Screens.CREATE_ROUTE.title) },
             modifier = Modifier
-                .padding(20.dp)
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
         ) {
             Text(
-                text = "Создать маршрут",
+                text = "Добавить маршрут",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimary
             )
