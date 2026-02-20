@@ -3,8 +3,11 @@ package com.example.touristguide.domain.interfaces
 import com.example.touristguide.domain.entities.Achievement
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
+import kotlinx.coroutines.flow.StateFlow
 
 interface Repository {
+    val allRoutes: StateFlow<List<Route>>
+
     /**
      * Получить сайт по id.
      */
@@ -18,12 +21,12 @@ interface Repository {
     /**
      * Получить список маршрутов по userId.
      */
-    suspend fun getAllRoutes(): List<Route>
+//    suspend fun getAllRoutes(): List<Route>
 
     /**
      * Добавить новый маршрут.
      */
-    suspend fun addNewRoute(order: List<Int>)
+    suspend fun addNewRoute(order: List<Sight>)
 
     /**
      * Получить список пройденных маршрутов.

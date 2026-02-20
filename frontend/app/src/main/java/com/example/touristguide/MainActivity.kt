@@ -11,8 +11,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.touristguide.data.repository.TestRepository
 import com.example.touristguide.presentation.ui.ChooseSightsScreen
+import com.example.touristguide.presentation.ui.MyRoutesScreen
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
 import com.example.touristguide.ui.theme.TouristGuideTheme
@@ -32,16 +36,41 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background
                 ) { innerPadding ->
-                    ChooseSightsScreen(mapViewModel, sightsViewModel, Modifier.padding(innerPadding))
+                    MainScreen(sightsViewModel, mapViewModel, Modifier.padding(innerPadding))
                 }
             }
         }
     }
 }
+
+enum class Screens(val title: String) {
+    MY_ROUTES("Мои маршруты"), CREATE_ROUTE("Создание маршрута")
+}
+
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun MainScreen(
+    sightsViewModel: SightsViewModel,
+    mapViewModel: MapViewModel,
+    modifier: Modifier = Modifier
+) {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = Screens.MY_ROUTES.title) {
+        composable(Screens.MY_ROUTES.title) {
+            MyRoutesScreen(
+                navController = navController,
+                viewModel = sightsViewModel,
+                modifier = modifier
+            )
+        }
+
+        composable(Screens.CREATE_ROUTE.title) {
+            ChooseSightsScreen(
+                navController = navController,
+                mapViewModel = mapViewModel,
+                sightsViewModel = sightsViewModel,
+                modifier = modifier
+            )
+        }
+    }
 }

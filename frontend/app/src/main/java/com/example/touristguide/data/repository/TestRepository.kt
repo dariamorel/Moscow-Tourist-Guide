@@ -8,6 +8,8 @@ import com.example.touristguide.domain.entities.Achievement
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.domain.interfaces.Repository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.osmdroid.util.GeoPoint
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -17,7 +19,8 @@ class TestRepository: Repository {
     private val allSights: List<Sight>? = null
     private val categoriesList: List<String>? = null
 
-    private val allRoutes = mutableListOf<Route>()
+    private val _allRoutes = MutableStateFlow<List<Route>>(mutableListOf())
+    override val allRoutes = _allRoutes.asStateFlow()
 
     override suspend fun getSight(id: Int): Sight {
         return getAllSights().find { id == it.id }!!
@@ -30,7 +33,7 @@ class TestRepository: Repository {
         return listOf(
             Sight(
                 id = 34245,
-                title = "клуб виртуальной реальности «Нереальное место»",
+                title = "Клуб виртуальной реальности «Нереальное место»",
                 address = "Нижний Сусальный пер., д. 5, стр. 5А",
                 timetable = "пн–пт 12:00–0:00, сб, вс 10:00–0:00",
                 phone = "+7 495 121-33-62",
@@ -40,11 +43,11 @@ class TestRepository: Repository {
                 coords = GeoPoint(55.75981199999999, 37.66422499999958),
                 subway = "",
                 images = listOf("https://media.kudago.com/images/place/67/5f/675f550a4878b642807120675afa1646.jpg"),
-                categories = listOf("amusement", "kids", "sights")
+                categories = listOf("развлечения", "дети", "достопримечательности")
             ),
             Sight(
                 id = 35922,
-                title = "сказочный музей «Особняк-Небылица»",
+                title = "Сказочный музей «Особняк-Небылица»",
                 address = "Озерковский пер., д. 1/18",
                 timetable = "ежедневно 10:00–22:00 (касса: ежедневно 10:00–21:20)",
                 phone = "+7 936 555-53-33",
@@ -54,7 +57,7 @@ class TestRepository: Repository {
                 coords = GeoPoint(55.741000999999855, 37.63743079999956),
                 subway = "Новокузнецкая, Третьяковская",
                 images = listOf("https://media.kudago.com/images/place/37/da/37da4d1aa6a805889924508432e328eb.jpg"),
-                categories = listOf("amusement", "kids", "museums")
+                categories = listOf("развлечения", "дети", "музеи")
             ),
             Sight(
                 id = 1734,
@@ -68,7 +71,7 @@ class TestRepository: Repository {
                 coords = GeoPoint(55.77079599999999, 37.60927199999999),
                 subway = "Чеховская",
                 images = listOf("https://media.kudago.com/images/place/8b/fc/8bfcd1317b116246b1c31babd88a9c40.jpeg"),
-                categories = listOf("park", "attractions", "recreation")
+                categories = listOf("парк", "аттракционы", "досуг")
             ),
             Sight(
                 id = 936,
@@ -82,11 +85,11 @@ class TestRepository: Repository {
                 coords = GeoPoint(55.768907, 37.626951),
                 subway = "Сухаревская, Трубная, Цветной бульвар",
                 images = listOf("https://media.kudago.com/images/place/00/d1/00d1a23bc86edc13c9aaa43e5599c7e3.JPG"),
-                categories = listOf("museums")
+                categories = listOf("музеи")
             ),
             Sight(
                 id = 18778,
-                title = "креативное пространство «Люмьер-Холл»",
+                title = "Креативное пространство «Люмьер-Холл»",
                 address = "Берсеневский пер., д. 2, стр. 1",
                 timetable = "ежедневно 11:00–23:00",
                 phone = "+7 999 877-10-78",
@@ -96,7 +99,7 @@ class TestRepository: Repository {
                 coords = GeoPoint(55.74076718192345, 37.60991006382213),
                 subway = "Кропоткинская, Полянка",
                 images = listOf("https://media.kudago.com/images/place/72/fd/72fdca056b037c8f7eff5ac304d73282.jpg"),
-                categories = listOf("coworking", "attractions", "sights", "cinema")
+                categories = listOf("коворкинг", "аттракционы", "достопримечательности", "кинотеатры")
             ),
             Sight(
                 id = 970,
@@ -110,11 +113,11 @@ class TestRepository: Repository {
                 coords = GeoPoint(55.72949799999995, 37.60619999999998),
                 subway = "Октябрьская, Парк Культуры",
                 images = listOf("https://media.kudago.com/images/place/18/fd/18fd1d7417873f00103cde6ef09e1e04.jpg"),
-                categories = listOf("amusement", "kids", "recreation")
+                categories = listOf("развлечения", "дети", "досуг")
             ),
             Sight(
                 id = 30400,
-                title = "парк «Зарядье»",
+                title = "Парк «Зарядье»",
                 address = "ул. Варварка, д. 6",
                 timetable = "ежедневно весь день",
                 phone = "+7 495 531-05-00",
@@ -124,11 +127,11 @@ class TestRepository: Repository {
                 coords = GeoPoint(55.75287499999981, 37.6287235),
                 subway = "Китай-город",
                 images = listOf("https://media.kudago.com/images/place/31/6c/316c54357f8722eefba532f89d023e85.jpg"),
-                categories = listOf("park", "attractions", "recreation")
+                categories = listOf("парк", "аттракционы", "досуг")
             ),
             Sight(
                 id = 684,
-                title = "ресторан «Турандот»",
+                title = "Ресторан «Турандот»",
                 address = "бул. Тверской, д. 26, стр. 3",
                 timetable = "ежедневно 12:00–0:00",
                 phone = "+7 495 531-05-00",
@@ -138,19 +141,16 @@ class TestRepository: Repository {
                 coords = GeoPoint(55.7637, 37.60503199999999),
                 subway = "Пушкинская, Тверская",
                 images = listOf("https://media.kudago.com/images/place/8d/23/8d23607b29f5ac10c5ce81adc4715d88.png"),
-                categories = listOf("restaurants")
+                categories = listOf("рестораны")
             )
         )
     }
 
-    override suspend fun getAllRoutes(): List<Route> {
-        return allRoutes
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun addNewRoute(order: List<Int>) {
-        val id = allRoutes.maxOf { it.id } + 1
-        allRoutes.add(Route(
+    override suspend fun addNewRoute(order: List<Sight>) {
+        val id = (_allRoutes.value.maxOfOrNull { it.id } ?: 0) + 1
+        val changedRoutes = _allRoutes.value.toMutableList()
+        changedRoutes.add(Route(
             id = id,
             order = order,
             orderPassed = emptyList(),
@@ -158,27 +158,30 @@ class TestRepository: Repository {
             date = LocalDateTime.now(),
             status = Route.Status.NOT_STARTED
         ))
+        _allRoutes.value = changedRoutes
         Log.d(DB_TAG, "New route added: ${id}.")
     }
 
     override suspend fun getPassedRoutes(): List<Route> {
-        return allRoutes.filter { it.status == Route.Status.PASSED }
+        return _allRoutes.value.filter { it.status == Route.Status.PASSED }
     }
 
     override suspend fun getDeclinedRoutes(): List<Route> {
-        return allRoutes.filter { it.status == Route.Status.DECLINED }
+        return _allRoutes.value.filter { it.status == Route.Status.DECLINED }
     }
 
     override suspend fun getRoutesInProgress(): List<Route> {
-        return allRoutes.filter { it.status == Route.Status.IN_PROGRESS }
+        return _allRoutes.value.filter { it.status == Route.Status.IN_PROGRESS }
     }
 
     override suspend fun updateRoute(
         routeId: Int,
         newRoute: Route
     ) {
-        allRoutes.removeIf { it.id == routeId }
-        allRoutes.add(newRoute)
+        val changedRoutes = _allRoutes.value.toMutableList()
+        changedRoutes.removeIf { it.id == routeId }
+        changedRoutes.add(newRoute)
+        _allRoutes.value = changedRoutes
     }
 
     override suspend fun getAllAchievements(): List<Achievement> {

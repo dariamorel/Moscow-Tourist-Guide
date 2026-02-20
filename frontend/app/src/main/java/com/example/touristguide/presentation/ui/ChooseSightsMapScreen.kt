@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.touristguide.Screens
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.ui.components.map.SightsMapItem
 import com.example.touristguide.presentation.viewModel.MapViewModel
@@ -24,6 +26,7 @@ import com.example.touristguide.presentation.viewModel.SightsViewModel
 
 @Composable
 fun ChooseSightsMapScreen(
+    navController: NavController,
     mapViewModel: MapViewModel,
     sightsViewModel: SightsViewModel,
     modifier: Modifier = Modifier,
@@ -50,7 +53,9 @@ fun ChooseSightsMapScreen(
             cardButton = cardButton
         )
         Button(
-            onClick = { sightsViewModel.createRoute() },
+            onClick = {
+                sightsViewModel.createRoute()
+                navController.navigate(Screens.MY_ROUTES.title) },
             modifier = Modifier.align(Alignment.End),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
         ) {

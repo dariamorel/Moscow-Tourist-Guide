@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavController
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
 import kotlinx.coroutines.launch
@@ -32,6 +33,7 @@ private enum class Tabs(val option: String) {
 
 @Composable
 fun ChooseSightsScreen(
+    navController: NavController,
     mapViewModel: MapViewModel,
     sightsViewModel: SightsViewModel,
     modifier: Modifier = Modifier
@@ -78,6 +80,7 @@ fun ChooseSightsScreen(
         ) { page ->
             when (page) {
                 0 -> ChooseSightsMapScreen(
+                    navController,
                     mapViewModel,
                     sightsViewModel,
                     Modifier.padding(innerPadding)
@@ -108,6 +111,7 @@ fun ChooseSightsScreen(
                 }
 
                 1 -> ChooseSightsSearchScreen(
+                    navController,
                     sightsViewModel,
                     Modifier.padding(innerPadding)
                 ) { modifier, sight ->

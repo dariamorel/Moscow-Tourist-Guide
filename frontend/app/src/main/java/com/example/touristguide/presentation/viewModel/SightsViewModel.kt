@@ -9,8 +9,11 @@ import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.domain.interfaces.Repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -29,7 +32,15 @@ class SightsViewModel(
     private val _categoriesList = MutableStateFlow<List<String>>(listOf())
     val categoriesList = _categoriesList.asStateFlow()
 
-    private val newRouteOrder = mutableListOf<Int>()
+    private val newRouteOrder = mutableListOf<Sight>()
+
+    val allRoutes = repository.allRoutes.map { routes ->
+        routes.sorted()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = emptyList()
+    )
 
     init {
         getAllSights()
@@ -48,16 +59,16 @@ class SightsViewModel(
     }
 
     fun addSightToRoute(sight: Sight) {
-        newRouteOrder.add(sight.id)
+        newRouteOrder.add(sight)
     }
 
     fun removeSightFromRoute(sight: Sight) {
-        newRouteOrder.remove(sight.id)
+        newRouteOrder.remove(sight)
     }
 
     fun createRoute() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.addNewRoute(newRouteOrder)
+            repository.addNewRoute(newRouteOrder.toMutableList())
             newRouteOrder.clear()
         }
     }

@@ -32,6 +32,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.touristguide.Screens
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.ui.components.map.ShowSightDetail
 import com.example.touristguide.presentation.viewModel.SightsViewModel
@@ -39,6 +41,7 @@ import com.example.touristguide.presentation.viewModel.SightsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChooseSightsSearchScreen(
+    navController: NavController,
     viewModel: SightsViewModel,
     modifier: Modifier = Modifier,
     cardButton: @Composable (Modifier, Sight) -> Unit
@@ -126,7 +129,9 @@ fun ChooseSightsSearchScreen(
         )
         Spacer(modifier = Modifier.weight(1f))
         Button(
-            onClick = { viewModel.createRoute() },
+            onClick = {
+                viewModel.createRoute()
+                navController.navigate(Screens.MY_ROUTES.title) },
             modifier = Modifier
                 .padding(20.dp)
                 .align(Alignment.End),
