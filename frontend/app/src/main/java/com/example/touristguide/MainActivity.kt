@@ -11,12 +11,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.touristguide.data.repository.TestRepository
+import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.presentation.ui.ChooseSightsScreen
 import com.example.touristguide.presentation.ui.MyRoutesScreen
+import com.example.touristguide.presentation.ui.RouteScreen
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
 import com.example.touristguide.ui.theme.TouristGuideTheme
@@ -44,7 +49,8 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class Screens(val title: String) {
-    MY_ROUTES("Мои маршруты"), CREATE_ROUTE("Создание маршрута")
+    MY_ROUTES("Мои маршруты"), CREATE_ROUTE("Создание маршрута"),
+    ACTIVE_ROUTE("Активный маршрут")
 }
 
 @Composable
@@ -69,6 +75,22 @@ fun MainScreen(
                 navController = navController,
                 mapViewModel = mapViewModel,
                 sightsViewModel = sightsViewModel,
+                modifier = modifier
+            )
+        }
+
+        composable(
+            "${Screens.ACTIVE_ROUTE.title}/{routeId}",
+            arguments = listOf(
+                navArgument("routeId") {
+                    type = NavType.IntType
+                }
+            )
+            ) { backStackEntry ->
+            val routeId = backStackEntry.arguments?.getInt("routeId") ?: 0
+            val route = sightsViewModel.getRouteById(routeId) ?: Route()
+            RouteScreen(
+                route = route,
                 modifier = modifier
             )
         }

@@ -1,5 +1,6 @@
 package com.example.touristguide.presentation.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,7 +62,9 @@ fun MyRoutesScreen(
         ) {
             allRoutes.forEachIndexed { i,  route ->
                 item {
-                    RouteItem(route, i + 1)
+                    RouteItem(route, i + 1, Modifier.clickable {
+                        navController.navigate("${Screens.ACTIVE_ROUTE.title}/${route.id}")
+                    })
                 }
             }
         }

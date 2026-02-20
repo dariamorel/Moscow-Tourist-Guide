@@ -1,15 +1,17 @@
 package com.example.touristguide.domain.entities
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import java.time.LocalDateTime
 import java.time.LocalTime
 
 data class Route(
-    val id: Int,
-    val order: List<Sight>,
-    val orderPassed: List<Sight>,
-    val totalTime: LocalTime,
-    val date: LocalDateTime,
-    val status: Status
+    val id: Int = 0,
+    val order: List<Sight> = emptyList(),
+    val orderPassed: List<Sight> = emptyList(),
+    val totalTime: LocalTime? = null,
+    val date: LocalDateTime? = null,
+    val status: Status = Status.NOT_STARTED
 ): Comparable<Route> {
     enum class Status(val title: String) {
         IN_PROGRESS("В процессе"), PASSED("Завершенный"), DECLINED("Отмененный"), NOT_STARTED("Не начатый")

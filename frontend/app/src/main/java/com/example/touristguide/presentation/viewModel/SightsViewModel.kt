@@ -63,6 +63,8 @@ class SightsViewModel(
         }
     }
 
+    fun getRouteById(id: Int) = allRoutes.value.find { route -> route.id == id }
+
     fun addSightToRoute(sight: Sight) {
         newRouteOrder.add(sight)
         _sightStatuses.update { map ->
