@@ -1,4 +1,4 @@
-package com.example.touristguide.presentation.ui.components
+package com.example.touristguide.presentation.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
-import com.example.touristguide.ui.theme.Orange
 import kotlinx.coroutines.launch
 
 private enum class Tabs(val option: String) {
@@ -78,14 +77,24 @@ fun ChooseSightsScreen(
                 .padding(innerPadding)
         ) { page ->
             when (page) {
-                0 -> ChooseSightsMapScreen(mapViewModel, sightsViewModel, Modifier.padding(innerPadding)) { modifier ->
+                0 -> ChooseSightsMapScreen(
+                    mapViewModel,
+                    sightsViewModel,
+                    Modifier.padding(innerPadding)
+                ) { modifier, sight ->
                     var buttonText by remember { mutableStateOf("Добавить") }
 
                     Button(
                         onClick = {
                             when (buttonText) {
-                                "Добавить" -> buttonText = "Удалить"
-                                "Удалить" -> buttonText = "Добавить"
+                                "Добавить" -> {
+                                    buttonText = "Удалить"
+                                    sightsViewModel.addSightToRoute(sight)
+                                }
+                                "Удалить" -> {
+                                    buttonText = "Добавить"
+                                    sightsViewModel.removeSightFromRoute(sight)
+                                }
                             }
                         },
                         modifier = modifier,
@@ -98,14 +107,23 @@ fun ChooseSightsScreen(
                     }
                 }
 
-                1 -> ChooseSightsSearchScreen(sightsViewModel, Modifier.padding(innerPadding)) { modifier ->
+                1 -> ChooseSightsSearchScreen(
+                    sightsViewModel,
+                    Modifier.padding(innerPadding)
+                ) { modifier, sight ->
                     var buttonText by remember { mutableStateOf("Добавить") }
 
                     Button(
                         onClick = {
                             when (buttonText) {
-                                "Добавить" -> buttonText = "Удалить"
-                                "Удалить" -> buttonText = "Добавить"
+                                "Добавить" -> {
+                                    buttonText = "Удалить"
+                                    sightsViewModel.addSightToRoute(sight)
+                                }
+                                "Удалить" -> {
+                                    buttonText = "Добавить"
+                                    sightsViewModel.removeSightFromRoute(sight)
+                                }
                             }
                         },
                         modifier = modifier,

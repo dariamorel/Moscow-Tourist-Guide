@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.domain.interfaces.Repository
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class SightsViewModel(
     private val repository: Repository
@@ -27,9 +29,11 @@ class SightsViewModel(
     private val _categoriesList = MutableStateFlow<List<String>>(listOf())
     val categoriesList = _categoriesList.asStateFlow()
 
+    private val newRouteOrder = mutableListOf<Int>()
+
     init {
         getAllSights()
-        getCategoriesList()
+        getAllCategories()
     }
 
     private fun getAllSights() {
@@ -40,6 +44,21 @@ class SightsViewModel(
             } catch(e: Exception) {
                 Log.e(SIGHTS_TAG, "Error getting all sights: ${e.message}")
             }
+        }
+    }
+
+    fun addSightToRoute(sight: Sight) {
+        newRouteOrder.add(sight.id)
+    }
+
+    fun removeSightFromRoute(sight: Sight) {
+        newRouteOrder.remove(sight.id)
+    }
+
+    fun createRoute() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addNewRoute(newRouteOrder)
+            newRouteOrder.clear()
         }
     }
 
@@ -69,10 +88,10 @@ class SightsViewModel(
         }
     }
 
-    private fun getCategoriesList() {
+    private fun getAllCategories() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _categoriesList.value = repository.getCategoriesList()
+                _categoriesList.value = repository.getAllCategories()
             } catch (e: Exception) {
                 Log.e(SIGHTS_TAG, "Error while getting categories: ${e.message}.")
             }

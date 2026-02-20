@@ -1,6 +1,5 @@
-package com.example.touristguide.presentation.ui.components
+package com.example.touristguide.presentation.ui.components.map
 
-import android.graphics.fonts.FontStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +26,7 @@ import com.example.touristguide.domain.entities.Sight
 fun ShowSightDetail(
     sight: Sight,
     modifier: Modifier = Modifier,
-    button: @Composable (Modifier) -> Unit = {}
+    button: @Composable (Modifier, Sight) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -103,7 +101,7 @@ fun ShowSightDetail(
                     )
                 }
             }
-            button(Modifier.align(Alignment.End))
+            button(Modifier.align(Alignment.End), sight)
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.touristguide.presentation.ui.components
+package com.example.touristguide.presentation.ui.components.map
 
 import android.content.Context
 import android.graphics.Canvas

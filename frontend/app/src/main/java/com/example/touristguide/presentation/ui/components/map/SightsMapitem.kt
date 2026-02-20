@@ -1,4 +1,4 @@
-package com.example.touristguide.presentation.ui.components
+package com.example.touristguide.presentation.ui.components.map
 
 import MapContainer
 import android.graphics.Point
@@ -23,13 +23,14 @@ import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 
 import androidx.compose.ui.layout.onGloballyPositioned
+import com.example.touristguide.domain.entities.Sight
 
 @Composable
 fun SightsMapItem(
     mapViewModel: MapViewModel,
     sightsViewModel: SightsViewModel,
     modifier: Modifier = Modifier,
-    cardButton: @Composable (Modifier) -> Unit = {}
+    cardButton: @Composable (Modifier, Sight) -> Unit
 ) {
     val sights by sightsViewModel.allSights.collectAsState()
     val selectedSight by sightsViewModel.selectedSight.collectAsState()

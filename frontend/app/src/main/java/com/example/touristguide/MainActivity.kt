@@ -12,9 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.touristguide.data.repository.TestRepository
-import com.example.touristguide.presentation.ui.components.ChooseSightsMapScreen
-import com.example.touristguide.presentation.ui.components.ChooseSightsScreen
-import com.example.touristguide.presentation.ui.components.SightsMapItem
+import com.example.touristguide.presentation.ui.ChooseSightsScreen
 import com.example.touristguide.presentation.viewModel.MapViewModel
 import com.example.touristguide.presentation.viewModel.SightsViewModel
 import com.example.touristguide.ui.theme.TouristGuideTheme

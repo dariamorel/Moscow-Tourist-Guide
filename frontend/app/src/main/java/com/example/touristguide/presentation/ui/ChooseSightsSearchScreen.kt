@@ -1,11 +1,8 @@
-package com.example.touristguide.presentation.ui.components
+package com.example.touristguide.presentation.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,6 +32,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.touristguide.domain.entities.Sight
+import com.example.touristguide.presentation.ui.components.map.ShowSightDetail
 import com.example.touristguide.presentation.viewModel.SightsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +41,7 @@ import com.example.touristguide.presentation.viewModel.SightsViewModel
 fun ChooseSightsSearchScreen(
     viewModel: SightsViewModel,
     modifier: Modifier = Modifier,
-    cardButton: @Composable (Modifier) -> Unit = {}
+    cardButton: @Composable (Modifier, Sight) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
     var categoryQuery by remember { mutableStateOf("") }
@@ -129,7 +126,7 @@ fun ChooseSightsSearchScreen(
         )
         Spacer(modifier = Modifier.weight(1f))
         Button(
-            onClick = {},
+            onClick = { viewModel.createRoute() },
             modifier = Modifier
                 .padding(20.dp)
                 .align(Alignment.End),

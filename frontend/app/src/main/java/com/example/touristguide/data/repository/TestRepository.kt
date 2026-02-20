@@ -1,13 +1,27 @@
 package com.example.touristguide.data.repository
 
+import android.annotation.TargetApi
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import com.example.touristguide.domain.entities.Achievement
+import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.domain.interfaces.Repository
 import org.osmdroid.util.GeoPoint
+import java.time.LocalDateTime
+import java.time.LocalTime
 import kotlin.collections.distinct
 
 class TestRepository: Repository {
     private val allSights: List<Sight>? = null
     private val categoriesList: List<String>? = null
+
+    private val allRoutes = mutableListOf<Route>()
+
+    override suspend fun getSight(id: Int): Sight {
+        return getAllSights().find { id == it.id }!!
+    }
 
     override suspend fun getAllSights(): List<Sight> {
         if (allSights != null) {
@@ -129,11 +143,77 @@ class TestRepository: Repository {
         )
     }
 
-    override suspend fun getCategoriesList(): List<String> {
+    override suspend fun getAllRoutes(): List<Route> {
+        return allRoutes
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun addNewRoute(order: List<Int>) {
+        val id = allRoutes.maxOf { it.id } + 1
+        allRoutes.add(Route(
+            id = id,
+            order = order,
+            orderPassed = emptyList(),
+            totalTime = LocalTime.of(0, 0),
+            date = LocalDateTime.now(),
+            status = Route.Status.NOT_STARTED
+        ))
+        Log.d(DB_TAG, "New route added: ${id}.")
+    }
+
+    override suspend fun getPassedRoutes(): List<Route> {
+        return allRoutes.filter { it.status == Route.Status.PASSED }
+    }
+
+    override suspend fun getDeclinedRoutes(): List<Route> {
+        return allRoutes.filter { it.status == Route.Status.DECLINED }
+    }
+
+    override suspend fun getRoutesInProgress(): List<Route> {
+        return allRoutes.filter { it.status == Route.Status.IN_PROGRESS }
+    }
+
+    override suspend fun updateRoute(
+        routeId: Int,
+        newRoute: Route
+    ) {
+        allRoutes.removeIf { it.id == routeId }
+        allRoutes.add(newRoute)
+    }
+
+    override suspend fun getAllAchievements(): List<Achievement> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getCompletedAchievements(): List<Achievement> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateAchievement(
+        achievementId: Int,
+        newAchievement: Achievement
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun registrate() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun login() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAllCategories(): List<String> {
         if (categoriesList != null) {
             return categoriesList
         }
         val allSightsList = getAllSights()
         return allSightsList.flatMap { it.categories }.distinct().sorted()
     }
+
+    companion object {
+        const val DB_TAG = "DB TAG"
+    }
+
 }
