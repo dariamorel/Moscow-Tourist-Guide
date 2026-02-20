@@ -47,6 +47,7 @@ fun RouteSightCard(
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
             .padding(8.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -88,22 +89,15 @@ fun RouteSightCard(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            Box(
+            Text(
+                text = sight.bodyText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Start,
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(
-                    text = sight.bodyText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 8.dp)
-                )
-            }
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+            )
 
             Column(
                 modifier = Modifier
