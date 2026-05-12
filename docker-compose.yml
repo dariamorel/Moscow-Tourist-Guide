@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tourguide
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: tourguide
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tourguide -d tourguide"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  flyway:
+    image: flyway/flyway:10.10.0-alpine
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/tourguide
+      FLYWAY_USER: tourguide
+      FLYWAY_PASSWORD: secret
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_SCHEMAS: tour_guide
+      FLYWAY_DEFAULT_SCHEMA: tour_guide
+    volumes:
+      - ./backend/migrations:/flyway/sql:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: tourguide
+      DB_USER: tourguide
+      DB_PASSWORD: secret
+      SERVER_PORT: 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  pgdata:
