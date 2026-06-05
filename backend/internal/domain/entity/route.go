@@ -16,10 +16,10 @@ const (
 )
 
 type Route struct {
-	ID           int64
-	UserID       int64
-	Order        []int64
-	PlannedOrder []int64
+	ID           int
+	UserID       int
+	Order        []int
+	PlannedOrder []int
 	TotalTime    string
 	Date         time.Time
 	Status       RouteStatus
@@ -50,4 +50,12 @@ func isValidRouteStatus(s RouteStatus) bool {
 		return true
 	}
 	return false
+}
+
+func GetRouteStatus(s string) RouteStatus {
+	res := RouteStatus(s)
+	if isValidRouteStatus(res) {
+		return res
+	}
+	return RouteStatus("")
 }

@@ -81,7 +81,7 @@ func (s *AuthService) Login(ctx context.Context, in LoginInput) (*entity.User, e
 	return user, nil
 }
 
-func (s *AuthService) GetUserByID(ctx context.Context, id int64) (*entity.User, error) {
+func (s *AuthService) GetUserByID(ctx context.Context, id int) (*entity.User, error) {
 	if id <= 0 {
 		return nil, domain.ErrInvalidInput
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 type RouteFilter struct {
-	UserID int64
+	UserID int
 	Status *entity.RouteStatus
 }
 
@@ -15,9 +15,9 @@ type RouteRepository interface {
 	
 	Update(ctx context.Context, route *entity.Route) error
 	
-	GetByID(ctx context.Context, id int64) (*entity.Route, error)
+	GetByID(ctx context.Context, id int) (*entity.Route, error)
 	
 	List(ctx context.Context, filter RouteFilter) ([]*entity.Route, error)
 	
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id int) error
 }

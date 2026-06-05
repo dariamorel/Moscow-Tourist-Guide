@@ -8,7 +8,7 @@ import(
 )
 
 type Sight struct {
-	ID          int64
+	ID          int
 	Img         string
 	Coordinates valueobject.Coordinates
 	Tags        []string

@@ -7,7 +7,7 @@ import(
 )
 
 type Achievement struct {
-	ID            int64
+	ID            int
 	Type          string
 	Name          string
 	Description   string
@@ -17,8 +17,8 @@ type Achievement struct {
 }
 
 type UserAchievement struct {
-	UserID        int64
-	AchievementID int64
+	UserID        int
+	AchievementID int
 	Progress      int
 	UnlockedAt    *time.Time
 }

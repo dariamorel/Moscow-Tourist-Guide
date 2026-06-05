@@ -9,8 +9,8 @@ import (
 )
 
 type UpdateAchievementInput struct {
-	UserID        int64
-	AchievementID int64
+	UserID        int
+	AchievementID int
 	Progress      int
 }
 
@@ -26,7 +26,7 @@ func (s *AchievementService) ListAll(ctx context.Context) ([]*entity.Achievement
  	return s.repo.ListAll(ctx)
 }
 
-func (s *AchievementService) ListCompletedByUser(ctx context.Context, userID int64) ([]*entity.Achievement, error) {
+func (s *AchievementService) ListCompletedByUser(ctx context.Context, userID int) ([]*entity.Achievement, error) {
 	if userID <= 0 {
 		return nil, domain.ErrInvalidInput
 	}

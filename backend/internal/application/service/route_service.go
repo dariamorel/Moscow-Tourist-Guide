@@ -10,22 +10,22 @@ import (
 )
 
 type CreateRouteInput struct {
-	UserID       int64
-	PlannedOrder []int64
+	UserID       int
+	PlannedOrder []int
 	TotalTime    string
 	Date         time.Time
 }
 
 type UpdateRouteInput struct {
-	Order        []int64
-	PlannedOrder []int64
+	Order        []int
+	PlannedOrder []int
 	TotalTime    string
 	Date         time.Time
 	Status       entity.RouteStatus
 }
 
 type ListRoutesInput struct {
-	UserID int64
+	UserID int
 	Status *entity.RouteStatus
 }
 
@@ -73,7 +73,15 @@ func (s *RouteService) CreateRoute(ctx context.Context, in CreateRouteInput) (*e
 	return route, nil
 }
 
-func (s *RouteService) UpdateRoute(ctx context.Context, routeID int64, in UpdateRouteInput) (*entity.Route, error) {
+func (s *RouteService) GetRoute(ctx context.Context, id int) (*entity.Route, error) {
+    if id <= 0 { return nil, domain.ErrInvalidInput }
+    route, err := s.routeRepo.GetByID(ctx, id)
+    if err != nil { return nil, err }
+    if route == nil { return nil, domain.ErrNotFound }
+    return route, nil
+}
+
+func (s *RouteService) UpdateRoute(ctx context.Context, routeID int, in UpdateRouteInput) (*entity.Route, error) {
 	if routeID <= 0 {
 		return nil, domain.ErrInvalidInput
 	}
@@ -122,7 +130,7 @@ func (s *RouteService) ListRoutes(ctx context.Context, in ListRoutesInput) ([]*e
 	})
 }
 
-func (s *RouteService) DeleteRoute(ctx context.Context, routeID int64) error {
+func (s *RouteService) DeleteRoute(ctx context.Context, routeID int) error {
 	if routeID <= 0 {
 		return domain.ErrInvalidInput
 	}

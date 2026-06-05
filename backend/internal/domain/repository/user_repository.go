@@ -10,5 +10,5 @@ type UserRepository interface {
 	
 	GetByLogin(ctx context.Context, login string) (*entity.User, error)
 	
-	GetByID(ctx context.Context, id int64) (*entity.User, error)
+	GetByID(ctx context.Context, id int) (*entity.User, error)
 }
