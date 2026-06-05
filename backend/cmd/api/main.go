@@ -2,35 +2,178 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"tour-guide/internal/infrastructure/http/api"
+	"tour-guide/internal/infrastructure/http/handler"
+	"tour-guide/internal/infrastructure/persistence/postgres"
+	"tour-guide/internal/application/service"
 )
 
+type config struct {
+	ServerPort string
+	DBHost     string
+	DBPort     string
+	DBName     string
+	DBUser     string
+	DBPassword string
+}
+
+func loadConfig() *config {
+	return &config{
+		ServerPort: getEnv("SERVER_PORT", "8000"),
+		DBHost:     getEnv("DB_HOST", "localhost"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBName:     getEnv("DB_NAME", "tourguide"),
+		DBUser:     getEnv("DB_USER", "tourguide"),
+		DBPassword: getEnv("DB_PASSWORD", "secret"),
+	}
+}
+
+func buildDBURL(cfg *config) string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
+	)
+}
+
+func getEnv(key, defaultValue string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+	return defaultValue
+}
+
+type apiServerImpl struct {
+	sightHandler       *handlers.SightHandler
+	routeHandler       *handlers.RouteHandler
+	authHandler        *handlers.AuthHandler
+	achievementHandler *handlers.AchievementHandler
+}
+
+func (s *apiServerImpl) GetSightsSightId(w http.ResponseWriter, r *http.Request, sightId int) {
+	 s.sightHandler.GetSight(w, r, sightId)
+}
+
+func (s *apiServerImpl) GetSights(w http.ResponseWriter, r *http.Request, params api.GetSightsParams) {
+ 	s.sightHandler.GetSights(w, r, params)
+}
+
+func (s *apiServerImpl) PostRoutes(w http.ResponseWriter, r *http.Request) {
+ 	s.routeHandler.CreateRoute(w, r)
+}
+
+func (s *apiServerImpl) PutRoutesRouteId(w http.ResponseWriter, r *http.Request, routeId int) {
+ 	s.routeHandler.UpdateRoute(w, r, routeId)
+}
+
+func (s *apiServerImpl) DeleteRoutesRouteId(w http.ResponseWriter, r *http.Request, routeId int) {
+ 	s.routeHandler.DeleteRoute(w, r, routeId)
+}
+
+func (s *apiServerImpl) GetRoutes(w http.ResponseWriter, r *http.Request, params api.GetRoutesParams) {
+ 	s.routeHandler.GetRoutes(w, r, params)
+}
+
+func (s *apiServerImpl) GetRoutesPassed(w http.ResponseWriter, r *http.Request, params api.GetRoutesPassedParams) {
+	 s.routeHandler.GetRoutesPassed(w, r, params)
+}
+
+func (s *apiServerImpl) GetRoutesDeclined(w http.ResponseWriter, r *http.Request, params api.GetRoutesDeclinedParams) {
+ 	s.routeHandler.GetRoutesDeclined(w, r, params)
+}
+
+func (s *apiServerImpl) GetRoutesInProgress(w http.ResponseWriter, r *http.Request, params api.GetRoutesInProgressParams) {
+ 	s.routeHandler.GetRoutesInProgress(w, r, params)
+}
+
+func (s *apiServerImpl) PostUsersRegistration(w http.ResponseWriter, r *http.Request) {
+ 	s.authHandler.Registration(w, r)
+}
+
+func (s *apiServerImpl) PostUsersLogin(w http.ResponseWriter, r *http.Request) {
+ 	s.authHandler.Login(w, r)
+}
+
+func (s *apiServerImpl) GetAchievements(w http.ResponseWriter, r *http.Request) {
+ 	s.achievementHandler.GetAchievements(w, r)
+}
+
+func (s *apiServerImpl) GetAchievementsCompleted(w http.ResponseWriter, r *http.Request, params api.GetAchievementsCompletedParams) {
+ 	s.achievementHandler.GetAchievementsCompleted(w, r, params)
+}
+
+func (s *apiServerImpl) PutAchievements(w http.ResponseWriter, r *http.Request) {
+ 	s.achievementHandler.UpdateAchievements(w, r)
+}
+
 func main() {
-	port := os.Getenv("SERVER_PORT")
-	if port == "" {
-		port = "8000"
+	cfg := loadConfig()
+
+	dbURL := buildDBURL(cfg)
+	db, err := pgxpool.New(context.Background(), dbURL)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	if err := db.Ping(context.Background()); err != nil {
+		log.Fatalf("failed to ping database: %v", err)
+	}
+	log.Println("Connected to PostgreSQL")
+
+	sightRepo := postgres.NewSightRepo(db)
+	routeRepo := postgres.NewRouteRepo(db)
+	userRepo := postgres.NewUserRepo(db)
+	achievementRepo := postgres.NewAchievementRepo(db)
+
+	sightService := service.NewSightService(sightRepo)
+	routeService := service.NewRouteService(routeRepo, sightRepo)
+	authService := service.NewAuthService(userRepo)
+	achievementService := service.NewAchievementService(achievementRepo)
+
+	sightHandler := handlers.NewSightHandler(sightService)
+	routeHandler := handlers.NewRouteHandler(routeService)
+	authHandler := handlers.NewAuthHandler(authService)
+	achievementHandler := handlers.NewAchievementHandler(achievementService)
+
+	serverImpl := &apiServerImpl{
+		sightHandler:       sightHandler,
+		routeHandler:       routeHandler,
+		authHandler:        authHandler,
+		achievementHandler: achievementHandler,
 	}
 
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.SetHeader("Content-Type", "application/json"))
+	r.Use(middleware.AllowContentType("application/json"))
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"ok"}`))
 	})
 
+	api.HandlerFromMux(serverImpl, r)
+
 	srv := &http.Server{
-		Addr: ":" + port,
-		Handler: mux,
+		Addr:    ":" + cfg.ServerPort,
+		Handler: r,
 	}
 
 	go func() {
-		log.Printf("Server starting on :%s", port)
+		log.Printf("Server starting on :%s", cfg.ServerPort)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("HTTP server error: %v", err)
 		}
@@ -41,7 +184,7 @@ func main() {
 	<-quit
 	log.Println("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
