@@ -1,20 +1,17 @@
 package com.example.touristguide.domain.entities
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.OffsetDateTime
 
 data class Route(
     val id: Int = 0,
-    val order: List<Sight> = emptyList(),
-    val isPassed: List<Boolean> = emptyList(),
-    val totalTime: LocalTime? = null,
-    val date: LocalDateTime? = null,
+    val isPassed: Map<Int, Boolean> = emptyMap(),
+    val planned: List<Sight> = emptyList(),
+    val totalTime: String? = null,
+    val date: OffsetDateTime? = null,
     val status: Status = Status.NOT_STARTED
 ): Comparable<Route> {
     enum class Status(val title: String) {
-        IN_PROGRESS("В процессе"), PASSED("Завершенный"), DECLINED("Отмененный"), NOT_STARTED("Не начатый")
+        IN_PROGRESS("in_progress"), PASSED("completed"), DECLINED("declined"), NOT_STARTED("planned")
     }
 
     override fun compareTo(other: Route): Int {

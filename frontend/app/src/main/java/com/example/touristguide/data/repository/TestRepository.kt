@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.touristguide.domain.entities.Achievement
+import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.domain.interfaces.Repository
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.osmdroid.util.GeoPoint
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.OffsetDateTime
 import kotlin.collections.distinct
 
 class TestRepository: Repository {
@@ -22,11 +24,11 @@ class TestRepository: Repository {
     private val _allRoutes = MutableStateFlow<List<Route>>(mutableListOf())
     override val allRoutes = _allRoutes.asStateFlow()
 
-    override suspend fun getSight(id: Int): Sight {
-        return getAllSights().find { id == it.id }!!
+    override suspend fun getSight(sightId: Int): Sight {
+        return getAllSights().find { sightId == it.id }!!
     }
 
-    override suspend fun getAllSights(): List<Sight> {
+    override suspend fun getAllSights(limit: Int?, offset: Int?, tag: String?): List<Sight> {
         if (allSights != null) {
             return allSights
         }
@@ -42,7 +44,7 @@ class TestRepository: Repository {
                 url = "https://www.nerealnoemesto.ru/",
                 coords = GeoPoint(55.75981199999999, 37.66422499999958),
                 subway = "",
-                images = listOf("https://media.kudago.com/images/place/67/5f/675f550a4878b642807120675afa1646.jpg"),
+                image = "https://media.kudago.com/images/place/67/5f/675f550a4878b642807120675afa1646.jpg",
                 categories = listOf("развлечения", "дети", "достопримечательности")
             ),
             Sight(
@@ -56,7 +58,7 @@ class TestRepository: Repository {
                 url = "https://москва-небылица.рф",
                 coords = GeoPoint(55.741000999999855, 37.63743079999956),
                 subway = "Новокузнецкая, Третьяковская",
-                images = listOf("https://media.kudago.com/images/place/37/da/37da4d1aa6a805889924508432e328eb.jpg"),
+                image = "https://media.kudago.com/images/place/37/da/37da4d1aa6a805889924508432e328eb.jpg",
                 categories = listOf("развлечения", "дети", "музеи")
             ),
             Sight(
@@ -70,7 +72,7 @@ class TestRepository: Repository {
                 url = "https://www.mosgorsad.ru/rest/katok/",
                 coords = GeoPoint(55.77079599999999, 37.60927199999999),
                 subway = "Чеховская",
-                images = listOf("https://media.kudago.com/images/place/8b/fc/8bfcd1317b116246b1c31babd88a9c40.jpeg"),
+                image = "https://media.kudago.com/images/place/8b/fc/8bfcd1317b116246b1c31babd88a9c40.jpeg",
                 categories = listOf("парк", "аттракционы", "досуг")
             ),
             Sight(
@@ -84,7 +86,7 @@ class TestRepository: Repository {
                 url = "http://centermars.ru/",
                 coords = GeoPoint(55.768907, 37.626951),
                 subway = "Сухаревская, Трубная, Цветной бульвар",
-                images = listOf("https://media.kudago.com/images/place/00/d1/00d1a23bc86edc13c9aaa43e5599c7e3.JPG"),
+                image = "https://media.kudago.com/images/place/00/d1/00d1a23bc86edc13c9aaa43e5599c7e3.JPG",
                 categories = listOf("музеи")
             ),
             Sight(
@@ -98,7 +100,7 @@ class TestRepository: Repository {
                 url = "http://www.lumierehall.ru",
                 coords = GeoPoint(55.74076718192345, 37.60991006382213),
                 subway = "Кропоткинская, Полянка",
-                images = listOf("https://media.kudago.com/images/place/72/fd/72fdca056b037c8f7eff5ac304d73282.jpg"),
+                image = "https://media.kudago.com/images/place/72/fd/72fdca056b037c8f7eff5ac304d73282.jpg",
                 categories = listOf("коворкинг", "аттракционы", "достопримечательности", "кинотеатры")
             ),
             Sight(
@@ -112,7 +114,7 @@ class TestRepository: Repository {
                 url = "",
                 coords = GeoPoint(55.72949799999995, 37.60619999999998),
                 subway = "Октябрьская, Парк Культуры",
-                images = listOf("https://media.kudago.com/images/place/18/fd/18fd1d7417873f00103cde6ef09e1e04.jpg"),
+                image = "https://media.kudago.com/images/place/18/fd/18fd1d7417873f00103cde6ef09e1e04.jpg",
                 categories = listOf("развлечения", "дети", "досуг")
             ),
             Sight(
@@ -126,7 +128,7 @@ class TestRepository: Repository {
                 url = "https://vk.com/zaryadyepark",
                 coords = GeoPoint(55.75287499999981, 37.6287235),
                 subway = "Китай-город",
-                images = listOf("https://media.kudago.com/images/place/31/6c/316c54357f8722eefba532f89d023e85.jpg"),
+                image = "https://media.kudago.com/images/place/31/6c/316c54357f8722eefba532f89d023e85.jpg",
                 categories = listOf("парк", "аттракционы", "досуг")
             ),
             Sight(
@@ -140,22 +142,22 @@ class TestRepository: Repository {
                 url = "https://vk.com/turandot.palace",
                 coords = GeoPoint(55.7637, 37.60503199999999),
                 subway = "Пушкинская, Тверская",
-                images = listOf("https://media.kudago.com/images/place/8d/23/8d23607b29f5ac10c5ce81adc4715d88.png"),
+                image = "https://media.kudago.com/images/place/8d/23/8d23607b29f5ac10c5ce81adc4715d88.png",
                 categories = listOf("рестораны")
             )
         )
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun addNewRoute(order: List<Sight>) {
+    override suspend fun addNewRoute(planned: List<Sight>) {
         val id = (_allRoutes.value.maxOfOrNull { it.id } ?: 0) + 1
         val changedRoutes = _allRoutes.value.toMutableList()
         changedRoutes.add(Route(
             id = id,
-            order = order,
-            isPassed = List(order.size) { false },
-            totalTime = LocalTime.of(0, 0),
-            date = LocalDateTime.now(),
+            planned = planned,
+            isPassed = emptyMap(),
+            totalTime = "2 h",
+            date = OffsetDateTime.now(),
             status = Route.Status.NOT_STARTED
         ))
         _allRoutes.value = changedRoutes
@@ -184,6 +186,13 @@ class TestRepository: Repository {
         _allRoutes.value = changedRoutes
     }
 
+    override suspend fun optimizeRoute(sights: List<Sight>): OptimizedSightsOrder {
+        return OptimizedSightsOrder(
+            sights = sights,
+            totalTime = "2 h"
+        )
+    }
+
     override suspend fun getAllAchievements(): List<Achievement> {
         TODO("Not yet implemented")
     }
@@ -196,14 +205,6 @@ class TestRepository: Repository {
         achievementId: Int,
         newAchievement: Achievement
     ) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun registrate() {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun login() {
         TODO("Not yet implemented")
     }
 

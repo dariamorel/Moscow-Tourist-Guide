@@ -1,6 +1,7 @@
 package com.example.touristguide.domain.interfaces
 
 import com.example.touristguide.domain.entities.Achievement
+import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
 import kotlinx.coroutines.flow.StateFlow
@@ -11,12 +12,12 @@ interface Repository {
     /**
      * Получить сайт по id.
      */
-    suspend fun getSight(id: Int): Sight
+    suspend fun getSight(sightId: Int): Sight
 
     /**
      * Получить список всех сайтов.
      */
-    suspend fun getAllSights(): List<Sight>
+    suspend fun getAllSights(limit: Int? = null, offset: Int? = null, tag: String? = null): List<Sight>
 
     /**
      * Получить список маршрутов по userId.
@@ -26,7 +27,7 @@ interface Repository {
     /**
      * Добавить новый маршрут.
      */
-    suspend fun addNewRoute(order: List<Sight>)
+    suspend fun addNewRoute(planned: List<Sight>)
 
     /**
      * Получить список пройденных маршрутов.
@@ -49,6 +50,11 @@ interface Repository {
     suspend fun updateRoute(routeId: Int, newRoute: Route)
 
     /**
+     * Получить оптимизированный маршрут.
+     */
+    suspend fun optimizeRoute(sights: List<Sight>): OptimizedSightsOrder
+
+    /**
      * Получить список возможных достижений.
      */
     suspend fun getAllAchievements(): List<Achievement>
@@ -62,16 +68,6 @@ interface Repository {
      * Обновить достижение.
      */
     suspend fun updateAchievement(achievementId: Int, newAchievement: Achievement)
-
-    /**
-     * Зарегистрироваться.
-     */
-    suspend fun registrate()
-
-    /**
-     * Залогиниться.
-     */
-    suspend fun login()
 
     /**
      * получить список всех категорий.
