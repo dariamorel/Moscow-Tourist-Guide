@@ -65,6 +65,36 @@ func UpdateRouteInputToDomain(routeID int, in api.RouteInput, existing *entity.R
 	return route, nil
 }
 
+func RouteUpdateInputToDomain(routeID int, in api.RouteUpdateInput, existing *entity.Route) (*entity.Route, error) {
+	route := &entity.Route{
+		ID:           routeID,
+		UserID:       existing.UserID,
+		Order:        existing.Order,
+		PlannedOrder: existing.PlannedOrder,
+		TotalTime:    existing.TotalTime,
+		Date:         existing.Date,
+		Status:       existing.Status,
+	}
+
+	if in.Order != nil {
+		route.Order = *in.Order
+	}
+	if in.PlannedOrder != nil {
+		route.PlannedOrder = *in.PlannedOrder
+	}
+	if in.TotalTime != nil {
+		route.TotalTime = *in.TotalTime
+	}
+	if in.Status != nil {
+		route.Status = entity.RouteStatus(*in.Status)
+	}
+
+	if err := route.Validate(); err != nil {
+		return nil, domain.ErrInvalidInput
+	}
+	return route, nil
+}
+
 func ParseRouteStatus(s *api.RouteStatus) (entity.RouteStatus, error) {
 	if s == nil {
 		return "", domain.ErrInvalidInput
@@ -87,4 +117,20 @@ func ParseRouteStatusFromParams(s *api.GetRoutesParamsStatus) (entity.RouteStatu
 	default:
 		return "", domain.ErrInvalidInput
 	}
+}
+
+func ParseRouteUpdateStatus(s *api.RouteUpdateInputStatus) (entity.RouteStatus, error) {
+	if s == nil {
+		return "", domain.ErrInvalidInput
+	}
+	switch entity.RouteStatus(*s) {
+	case entity.StatusPlanned, entity.StatusInProgress, entity.StatusCompleted, entity.StatusDeclined:
+		return entity.RouteStatus(*s), nil
+	default:
+		return "", domain.ErrInvalidInput
+	}
+}
+
+func ToAPIRouteUpdateStatus(s entity.RouteStatus) api.RouteUpdateInputStatus {
+ 	return api.RouteUpdateInputStatus(s)
 }

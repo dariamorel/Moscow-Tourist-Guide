@@ -55,10 +55,10 @@ func getEnv(key, defaultValue string) string {
 }
 
 type apiServerImpl struct {
-	sightHandler       *handlers.SightHandler
-	routeHandler       *handlers.RouteHandler
-	authHandler        *handlers.AuthHandler
-	achievementHandler *handlers.AchievementHandler
+	sightHandler       *handler.SightHandler
+	routeHandler       *handler.RouteHandler
+	authHandler        *handler.AuthHandler
+	achievementHandler *handler.AchievementHandler
 }
 
 func (s *apiServerImpl) GetSightsSightId(w http.ResponseWriter, r *http.Request, sightId int) {
@@ -142,10 +142,10 @@ func main() {
 	authService := service.NewAuthService(userRepo)
 	achievementService := service.NewAchievementService(achievementRepo)
 
-	sightHandler := handlers.NewSightHandler(sightService)
-	routeHandler := handlers.NewRouteHandler(routeService)
-	authHandler := handlers.NewAuthHandler(authService)
-	achievementHandler := handlers.NewAchievementHandler(achievementService)
+	sightHandler := handler.NewSightHandler(sightService)
+	routeHandler := handler.NewRouteHandler(routeService)
+	authHandler := handler.NewAuthHandler(authService)
+	achievementHandler := handler.NewAchievementHandler(achievementService)
 
 	serverImpl := &apiServerImpl{
 		sightHandler:       sightHandler,

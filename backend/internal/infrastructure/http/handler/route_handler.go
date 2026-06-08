@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"time"
@@ -50,7 +50,7 @@ func (h *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request, routeId int) {
-	var input api.RouteInput
+	var input api.RouteUpdateInput
 	if err := decodeJSON(r, &input); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
@@ -66,19 +66,20 @@ func (h *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request, route
 		return
 	}
 
-	domainRoute, err := mappers.UpdateRouteInputToDomain(routeId, input, existing)
+	domainRoute, err := mappers.RouteUpdateInputToDomain(routeId, input, existing)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	updated, err := h.service.UpdateRoute(r.Context(), domainRoute.ID, service.UpdateRouteInput{
-		Order:        domainRoute.Order,
-		PlannedOrder: domainRoute.PlannedOrder,
-		TotalTime:    domainRoute.TotalTime,
-		Date:         domainRoute.Date,
-		Status:       domainRoute.Status,
-	})
+	updateData := service.UpdateRouteData{
+		Order:        &domainRoute.Order,
+		PlannedOrder: &domainRoute.PlannedOrder,
+		TotalTime:    &domainRoute.TotalTime,
+		Status:       &domainRoute.Status,
+	}
+
+	updated, err := h.service.UpdateRoute(r.Context(), domainRoute.ID, updateData)
 	if err != nil {
 		if err == domain.ErrNotFound {
 			respondError(w, http.StatusNotFound, "Route not found")

@@ -56,7 +56,8 @@ func (r *routeRepo) Update(ctx context.Context, route *entity.Route) error {
 	defer tx.Rollback(ctx)
 
 	q1 := `
-	UPDATE routes SET status = $2, total_time = $3, date = $4, updated_at = NOW()
+	UPDATE routes 
+	SET status = $2, total_time = $3, date = $4, updated_at = NOW()
 	WHERE id = $1
 	`
 	res, err := tx.Exec(ctx, q1, route.ID, route.Status, route.TotalTime, route.Date)
@@ -67,19 +68,23 @@ func (r *routeRepo) Update(ctx context.Context, route *entity.Route) error {
 		return domain.ErrNotFound
 	}
 
-	_, _ = tx.Exec(ctx, `DELETE FROM route_items WHERE route_id = $1`, route.ID)
+	if len(route.PlannedOrder) > 0 || len(route.Order) > 0 {
+		_, _ = tx.Exec(ctx, `DELETE FROM route_items WHERE route_id = $1`, route.ID)
 
-	for i, sightID := range route.PlannedOrder {
-		status := "planned"
-		for _, visitedID := range route.Order {
-			if visitedID == sightID {
-				status = "visited"
-				break
-			}
+		visitedSet := make(map[int]bool)
+		for _, id := range route.Order {
+			visitedSet[id] = true
 		}
-		q2 := `INSERT INTO route_items (route_id, sight_id, stop_order, status) VALUES ($1, $2, $3, $4)`
-		if _, err := tx.Exec(ctx, q2, route.ID, sightID, i+1, status); err != nil {
-			return mapError(err)
+
+		for i, sightID := range route.PlannedOrder {
+			status := "planned"
+			if visitedSet[sightID] {
+				status = "visited"
+			}
+			q2 := `INSERT INTO route_items (route_id, sight_id, stop_order, status) VALUES ($1, $2, $3, $4)`
+			if _, err := tx.Exec(ctx, q2, route.ID, sightID, i+1, status); err != nil {
+				return mapError(err)
+			}
 		}
 	}
 

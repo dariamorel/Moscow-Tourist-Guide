@@ -97,6 +97,30 @@ components:
         total_time:
           type: string
 
+    RouteUpdateInput:
+      type: object
+      description: "Данные для обновления маршрута"
+      properties:
+        order:
+          type: array
+          description: "Пройденные достопримечательности (по порядку)"
+          items:
+            type: integer
+          example: [1, 3]
+        planned_order:
+          type: array
+          description: "Полный запланированный маршрут (если нужно изменить)"
+          items:
+            type: integer
+          example: [1, 2, 3, 4, 5]
+        total_time:
+          type: string
+          example: "2h 30m"
+        status:
+          type: string
+          enum: [planned, in_progress, completed, declined]
+          example: "in_progress"
+
     User:
       type: object
       properties:
@@ -367,7 +391,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RouteInput'
+              $ref: '#/components/schemas/RouteUpdateInput'
       responses:
         '200':
           description: Маршрут обновлён

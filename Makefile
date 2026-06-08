@@ -25,7 +25,7 @@ backend-run: backend-build
 
 backend-test:
 	@echo "Running backend tests..."
-	cd backend && go test -v -race -cover ./...
+	cd backend && go test -v -race ./...
 
 backend-clean:
 	@echo "Cleaning backend artifacts..."

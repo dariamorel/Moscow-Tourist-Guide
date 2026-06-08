@@ -24,6 +24,13 @@ type UpdateRouteInput struct {
 	Status       entity.RouteStatus
 }
 
+type UpdateRouteData struct {
+	Order        *[]int
+	PlannedOrder *[]int
+	TotalTime    *string
+	Status       *entity.RouteStatus
+}
+
 type ListRoutesInput struct {
 	UserID int
 	Status *entity.RouteStatus
@@ -81,7 +88,7 @@ func (s *RouteService) GetRoute(ctx context.Context, id int) (*entity.Route, err
     return route, nil
 }
 
-func (s *RouteService) UpdateRoute(ctx context.Context, routeID int, in UpdateRouteInput) (*entity.Route, error) {
+func (s *RouteService) UpdateRoute(ctx context.Context, routeID int, data UpdateRouteData) (*entity.Route, error) {
 	if routeID <= 0 {
 		return nil, domain.ErrInvalidInput
 	}
@@ -94,20 +101,17 @@ func (s *RouteService) UpdateRoute(ctx context.Context, routeID int, in UpdateRo
 		return nil, domain.ErrNotFound
 	}
 
-	if len(in.PlannedOrder) > 0 {
-		route.PlannedOrder = in.PlannedOrder
+	if data.Order != nil {
+		route.Order = *data.Order
 	}
-	if in.Order != nil {
-		route.Order = in.Order
+	if data.PlannedOrder != nil {
+		route.PlannedOrder = *data.PlannedOrder
 	}
-	if in.TotalTime != "" {
-		route.TotalTime = in.TotalTime
+	if data.TotalTime != nil {
+		route.TotalTime = *data.TotalTime
 	}
-	if !in.Date.IsZero() {
-		route.Date = in.Date
-	}
-	if in.Status != "" {
-		route.Status = in.Status
+	if data.Status != nil {
+		route.Status = *data.Status
 	}
 
 	if err := route.Validate(); err != nil {
