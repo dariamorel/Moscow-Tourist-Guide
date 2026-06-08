@@ -20,9 +20,9 @@ func NewUserRepo(db *pgxpool.Pool) repository.UserRepository {
 func (r *userRepo) Create(ctx context.Context, user *entity.User) error {
 	q := `
 	INSERT INTO users (login, password_hash, created_at)
-	VALUES ($1, $2, NOW()) RETURNING id
+	VALUES ($1, $2, NOW()) RETURNING id, created_at
 	`
-	return r.db.QueryRow(ctx, q, user.Login, user.PasswordHash).Scan(&user.ID)
+	return r.db.QueryRow(ctx, q, user.Login, user.PasswordHash).Scan(&user.ID, &user.CreatedAt)
 }
 
 func (r *userRepo) GetByLogin(ctx context.Context, login string) (*entity.User, error) {

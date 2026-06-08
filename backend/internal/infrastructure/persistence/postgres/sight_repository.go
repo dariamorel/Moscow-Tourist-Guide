@@ -19,10 +19,10 @@ func NewSightRepo(db *pgxpool.Pool) repository.SightRepository {
 
 func (r *sightRepo) GetByID(ctx context.Context, id int) (*entity.Sight, error) {
 	query := `
-	SELECT id, img, lat, lon, short_desc, description, 
+	SELECT id, img, lat, lon, short_desc, full_desc, 
 			COALESCE(timetable, ''), COALESCE(addr, ''), COALESCE(phone, ''), COALESCE(subway, ''),
 			created_at, updated_at
-	FROM sights
+	FROM tour_guide.sights
 	WHERE id = $1
 	`
 
@@ -47,10 +47,10 @@ func (r *sightRepo) GetByID(ctx context.Context, id int) (*entity.Sight, error) 
 
 func (r *sightRepo) List(ctx context.Context, filter repository.SightFilter) ([]*entity.Sight, error) {
 	baseQuery := `
-	SELECT DISTINCT s.id, s.img, s.lat, s.lon, s.short_desc, s.description,
+	SELECT DISTINCT s.id, s.img, s.lat, s.lon, s.short_desc, s.full_desc,
 			COALESCE(s.timetable, ''), COALESCE(s.addr, ''), COALESCE(s.phone, ''), COALESCE(s.subway, ''),
 			s.created_at, s.updated_at
-	FROM sights s
+	FROM tour_guide.sights s
 	LEFT JOIN sight_to_tag stt ON s.id = stt.sight_id
 	LEFT JOIN tags t ON stt.tag_id = t.id
 	WHERE ($3::text IS NULL OR t.name = $3)
@@ -83,7 +83,7 @@ func (r *sightRepo) List(ctx context.Context, filter repository.SightFilter) ([]
 }
 
 func (r *sightRepo) loadTags(ctx context.Context, sightID int) ([]string, error) {
-	query := `SELECT t.name FROM sight_to_tag stt JOIN tags t ON stt.tag_id = t.id WHERE stt.sight_id = $1`
+	query := `SELECT t.name FROM tour_guide.sight_to_tag stt JOIN tour_guide.tags t ON stt.tag_id = t.id WHERE stt.sight_id = $1`
 	rows, err := r.db.Query(ctx, query, sightID)
 	if err != nil {
 		return nil, mapError(err)

@@ -8,11 +8,17 @@ import (
 func ToAPIUser(u *entity.User) api.User {
 	id := u.ID
 	login := u.Login
-	return api.User{
-		Id:        &id,
-		Login:     &login,
+	apiUser := api.User{
+		Id:        Ptr(id),
+		Login:     Ptr(login),
 		CreatedAt: Ptr(u.CreatedAt),
 	}
+
+	if !u.CreatedAt.IsZero() {
+		apiUser.CreatedAt = Ptr(u.CreatedAt)
+	}
+
+	return apiUser
 }
 
 func UserInputToEntity(in api.UserInput) *entity.User {

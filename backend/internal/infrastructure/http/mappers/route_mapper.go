@@ -29,16 +29,12 @@ func ToAPIRoutes(routes []*entity.Route) []api.Route {
 	return res
 }
 
-func RouteInputToDomain(in api.RouteInput, date time.Time) (*entity.Route, error) {
-	if date.IsZero() {
-		date = time.Now()
-	}
-
+func RouteInputToDomain(in api.RouteInput) (*entity.Route, error) {
 	route := &entity.Route{
 		UserID:       in.UserId,
 		PlannedOrder: in.PlannedOrder,
 		TotalTime:    Val(in.TotalTime, ""),
-		Date:         date,
+		Date:         time.Now(),
 		Status:       entity.StatusPlanned,
 	}
 

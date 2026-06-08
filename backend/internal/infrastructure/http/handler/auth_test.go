@@ -32,10 +32,16 @@ func TestAuthEndpoints(t *testing.T) {
 		var user api.User
 		err = json.NewDecoder(resp.Body).Decode(&user)
 		require.NoError(t, err)
-		
-		assert.Equal(t, "testuser", user.Login)
+
+		require.NotNil(t, user.Login, "login should not be nil")
+		assert.Equal(t, "testuser", *user.Login)
+
 		assert.NotNil(t, user.Id)
-		assert.Nil(t, user.CreatedAt)
+		assert.Greater(t, *user.Id, 0)
+
+		if user.CreatedAt != nil {
+			assert.False(t, user.CreatedAt.IsZero(), "created_at should not be zero")
+		}
 	})
 
 	t.Run("POST /users/registration - duplicate login", func(t *testing.T) {

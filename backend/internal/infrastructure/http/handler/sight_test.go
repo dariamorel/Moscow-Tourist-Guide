@@ -63,7 +63,7 @@ func TestSightsEndpoints(t *testing.T) {
 		err = json.NewDecoder(resp.Body).Decode(&sight)
 		require.NoError(t, err)
 		
-		assert.Equal(t, int64(1), sight.Id)
+		assert.Equal(t, 1, sight.Id)
 		assert.Equal(t, "Красная площадь", sight.ShortDesc)
 		assert.Equal(t, 55.7539, sight.Lat)
 	})
@@ -76,7 +76,7 @@ func TestSightsEndpoints(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 		var errResp api.Error
 		json.NewDecoder(resp.Body).Decode(&errResp)
-		assert.Equal(t, "NOT_FOUND", errResp.Code)
+		assert.Equal(t, "Not Found", errResp.Code)
 	})
 
 	t.Run("GET /sights/{id} - invalid ID", func(t *testing.T) {

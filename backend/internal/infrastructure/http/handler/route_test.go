@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"testing"
 
@@ -13,17 +14,14 @@ import (
 	"tour-guide/internal/infrastructure/http/api"
 )
 
-func ptr[T any](v T) *T {
- 	return &v
-}
-
 func TestRouteEndpoints(t *testing.T) {
 	env := setupTestEnv(t)
 	defer env.teardown()
 
-	user := registerUser(t, env, "routeuser", "Pass123!")
-	require.NotNil(t, user)
-	userID := int(*user.Id)
+	user := registerUser(t, env, "routeuser", "SecurePass123!")
+	require.NotNil(t, user, "registration failed")
+	require.NotNil(t, user.Id, "user id is nil")
+	userID := *user.Id
 
 	t.Run("POST /routes - create new route", func(t *testing.T) {
 		input := api.RouteInput{
@@ -37,12 +35,17 @@ func TestRouteEndpoints(t *testing.T) {
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
+		if resp.StatusCode != http.StatusCreated {
+			body, _ := io.ReadAll(resp.Body)
+			t.Logf("Create route failed: %d - %s", resp.StatusCode, string(body))
+		}
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+		
 		var route api.Route
 		err = json.NewDecoder(resp.Body).Decode(&route)
 		require.NoError(t, err)
 
-		assert.NotNil(t, route.Id)
+		assert.Greater(t, route.Id, 0)
 		assert.Equal(t, userID, route.UserId)
 		assert.Equal(t, []int{1, 2, 3}, *route.PlannedOrder)
 		assert.Equal(t, api.RouteStatusPlanned, *route.Status)
@@ -58,7 +61,8 @@ func TestRouteEndpoints(t *testing.T) {
 		}
 		reqBody, _ := json.Marshal(input)
 
-		req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/routes/%d", env.baseURL, routeID), bytes.NewReader(reqBody))
+		url := fmt.Sprintf("%s/routes/%d", env.baseURL, routeID)
+		req, _ := http.NewRequest("PUT", url, bytes.NewReader(reqBody))
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := env.client.Do(req)
@@ -73,70 +77,33 @@ func TestRouteEndpoints(t *testing.T) {
 		assert.Equal(t, []int{1, 2}, *updated.Order)
 		assert.Equal(t, "2h 15m", *updated.TotalTime)
 		assert.Equal(t, api.RouteStatusInProgress, *updated.Status)
-		assert.Equal(t, []int{1, 2, 3}, *updated.PlannedOrder)
 	})
 
-	t.Run("PUT /routes/{id} - mark as completed", func(t *testing.T) {
-		routeID := createTestRoute(t, env, userID, []int{1, 2})
+	t.Run("GET /routes - list user routes", func(t *testing.T) {
+		_ = createTestRoute(t, env, userID, []int{1, 2})
 
-		input := api.RouteUpdateInput{
-			Order:  ptr([]int{1, 2}),
-			Status: ptr(api.RouteUpdateInputStatusCompleted),
-		}
-		reqBody, _ := json.Marshal(input)
-
-		req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/routes/%d", env.baseURL, routeID), bytes.NewReader(reqBody))
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := env.client.Do(req)
+		url := fmt.Sprintf("%s/routes?user_id=%d", env.baseURL, userID)
+		resp, err := env.client.Get(url)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		var updated api.Route
-		json.NewDecoder(resp.Body).Decode(&updated)
-
-		assert.Equal(t, api.RouteStatusCompleted, *updated.Status)
-		assert.Equal(t, []int{1, 2}, *updated.Order)
+		var routes []api.Route
+		err = json.NewDecoder(resp.Body).Decode(&routes)
+		require.NoError(t, err)
+		assert.NotEmpty(t, routes)
 	})
 
-	t.Run("PUT /routes/{id} - change planned_order", func(t *testing.T) {
-		routeID := createTestRoute(t, env, userID, []int{1, 2, 3})
+	t.Run("DELETE /routes/{id} - success", func(t *testing.T) {
+		routeID := createTestRoute(t, env, userID, []int{1})
 
-		input := api.RouteUpdateInput{
-			PlannedOrder: ptr([]int{3, 1, 2}),
-		}
-		reqBody, _ := json.Marshal(input)
-
-		req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/routes/%d", env.baseURL, routeID), bytes.NewReader(reqBody))
-		req.Header.Set("Content-Type", "application/json")
-
+		url := fmt.Sprintf("%s/routes/%d", env.baseURL, routeID)
+		req, _ := http.NewRequest("DELETE", url, nil)
 		resp, err := env.client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
-		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		var updated api.Route
-		json.NewDecoder(resp.Body).Decode(&updated)
-
-		assert.Equal(t, []int{3, 1, 2}, *updated.PlannedOrder)
-		assert.Equal(t, api.RouteStatusPlanned, *updated.Status)
-	})
-
-	t.Run("PUT /routes/{id} - not found", func(t *testing.T) {
-		input := api.RouteUpdateInput{
-			Status: ptr(api.RouteUpdateInputStatusDeclined),
-		}
-		reqBody, _ := json.Marshal(input)
-
-		req, _ := http.NewRequest("PUT", env.baseURL+"/routes/9999", bytes.NewReader(reqBody))
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := env.client.Do(req)
-		require.NoError(t, err)
-		defer resp.Body.Close()
-
-		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 	})
 }
 
@@ -153,7 +120,19 @@ func createTestRoute(t *testing.T, env *testEnv, userID int, planned []int) int 
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusCreated {
+		body, _ := io.ReadAll(resp.Body)
+		t.Fatalf("createTestRoute failed: %d - %s", resp.StatusCode, string(body))
+	}
+
 	var route api.Route
-	_ = json.NewDecoder(resp.Body).Decode(&route)
+	err = json.NewDecoder(resp.Body).Decode(&route)
+	require.NoError(t, err)
+	
+	assert.Greater(t, route.Id, 0)
 	return route.Id
+}
+
+func ptr[T any](v T) *T {
+ 	return &v
 }

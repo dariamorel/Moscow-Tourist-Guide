@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"time"
 	"net/http"
+	"log"
 
 	"tour-guide/internal/application/service"
 	"tour-guide/internal/domain"
@@ -22,13 +22,17 @@ func NewRouteHandler(svc *service.RouteService) *RouteHandler {
 func (h *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 	var input api.RouteInput
 	if err := decodeJSON(r, &input); err != nil {
+		log.Printf("CreateRoute: JSON decode error: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
+	
+	log.Printf("CreateRoute: input.UserId=%d, len(PlannedOrder)=%d", input.UserId, len(input.PlannedOrder))
 
-	route, err := mappers.RouteInputToDomain(input, time.Now())
+	route, err := mappers.RouteInputToDomain(input)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		log.Printf("CreateRoute: mapper error: %v", err)
+		respondError(w, http.StatusBadRequest, "Invalid route data")
 		return
 	}
 
@@ -39,13 +43,15 @@ func (h *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		Date:         route.Date,
 	})
 	if err != nil {
-	if err == domain.ErrInvalidInput {
-	respondError(w, http.StatusBadRequest, "Invalid route data")
-	return
+		log.Printf("CreateRoute: service error: %T - %v", err, err)
+		if err == domain.ErrInvalidInput {
+			respondError(w, http.StatusBadRequest, "Invalid route data")
+			return
+		}
+		respondError(w, http.StatusInternalServerError, "Failed to create route")
+		return
 	}
-	respondError(w, http.StatusInternalServerError, "Failed to create route")
-	return
-	}
+	log.Printf("CreateRoute: success, route_id=%d", created.ID)
 	respondJSON(w, http.StatusCreated, mappers.ToAPIRoute(created))
 }
 

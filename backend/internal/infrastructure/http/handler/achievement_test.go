@@ -3,6 +3,7 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -17,7 +18,10 @@ func TestAchievementEndpoints(t *testing.T) {
 	defer env.teardown()
 
 	user := registerUser(t, env, "achieveuser", "Pass123!")
+	require.NotNil(t, user, "registration failed")
+	require.NotNil(t, user.Id, "user id is nil")
 	require.NotNil(t, user)
+	userID := *user.Id
 
 	t.Run("GET /achievements - list all", func(t *testing.T) {
 		resp, err := env.client.Get(env.baseURL + "/achievements")
@@ -34,7 +38,8 @@ func TestAchievementEndpoints(t *testing.T) {
 	})
 
 	t.Run("GET /achievements/completed - empty for new user", func(t *testing.T) {
-		resp, err := env.client.Get(env.baseURL + "/achievements/completed?user_id=" + string(rune(*user.Id)))
+		url := fmt.Sprintf("%s/achievements/completed?user_id=%d", env.baseURL, userID)
+		resp, err := env.client.Get(url)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
@@ -61,11 +66,13 @@ func TestAchievementEndpoints(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-		resp2, _ := env.client.Get(env.baseURL + "/achievements/completed?user_id=" + string(rune(*user.Id)))
+		url := fmt.Sprintf("%s/achievements/completed?user_id=%d", env.baseURL, userID)
+		resp2, _ := env.client.Get(url)
 		var completed []api.Achievement
 		json.NewDecoder(resp2.Body).Decode(&completed)
 		assert.NotEmpty(t, completed)
-		assert.Equal(t, 1, completed[0].Id)
+		require.NotNil(t, completed[0].Id, "achievement_id should not be nil")
+		assert.Equal(t, 1, *completed[0].Id)
 	})
 
 	t.Run("PUT /achievements - invalid progress", func(t *testing.T) {

@@ -34,7 +34,7 @@ func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*entity.U
 	}
 
 	exists, err := s.repo.GetByLogin(ctx, in.Login)
-	if err != nil {
+	if err != nil && err != domain.ErrNotFound {
 		return nil, err
 	}
 	if exists != nil {
