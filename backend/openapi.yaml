@@ -120,6 +120,41 @@ components:
           type: string
           enum: [planned, in_progress, completed, declined]
           example: "in_progress"
+      
+    OptimizeRouteInput:
+      type: object
+      required: [sight_ids, start_id, end_id]
+      properties:
+        sight_ids:
+          type: array
+          items: { type: integer }
+          description: "ID достопримечательностей для оптимизации (без start/end)"
+          example: [2, 3, 4]
+        start_id:
+          type: integer
+          description: "ID начальной точки (всегда первая)"
+          example: 1
+        end_id:
+          type: integer
+          description: "ID конечной точки (всегда последняя)"
+          example: 5
+
+    OptimizeRouteOutput:
+      type: object
+      properties:
+        optimized_order:
+          type: array
+          items: { type: integer }
+          description: "Оптимизированный порядок обхода (включая start/end)"
+          example: [1, 3, 2, 4, 5]
+        total_time:
+          type: string
+          description: "Общее время в формате '2h 15m'"
+          example: "2h 15m"
+        total_distance:
+          type: integer
+          description: "Общее расстояние в метрах"
+          example: 4500
 
     User:
       type: object
@@ -421,6 +456,38 @@ paths:
           description: Удалено
         '404':
           description: Не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+  /routes/optimize:
+    post:
+      summary: Оптимизировать порядок обхода достопримечательностей
+      tags: [Routes]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptimizeRouteInput'
+      responses:
+        '200':
+          description: Оптимизированный маршрут
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptimizeRouteOutput'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Достопримечательность не найдена
           content:
             application/json:
               schema:
