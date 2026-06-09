@@ -1,5 +1,5 @@
 .PHONY: backend-gen backend-build backend-run backend-test backend-clean \
-	db-up db-migrate db-down \
+	db-up db-migrate db-down db-reset db-seed \
 	up down logs restart \
 	fresh
 
@@ -44,6 +44,14 @@ db-migrate:
 db-down:
 	@echo "Removing database volumes..."
 	docker-compose down -v
+
+db-seed:
+	@echo "Seeding database with sights data..."
+	cd backend && go run ./cmd/seed/main.go
+	@echo "Database seeded successfully"
+
+db-reset: db-down db-up db-migrate db-seed
+	@echo "Database reset complete (migrated + seeded)"
 
 up:
 	@echo "Starting all services..."

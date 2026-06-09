@@ -33,7 +33,7 @@ func loadConfig() *config {
 	return &config{
 		ServerPort: getEnv("SERVER_PORT", "8000"),
 		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
+		DBPort:     getEnv("DB_PORT", "5433"),
 		DBName:     getEnv("DB_NAME", "tourguide"),
 		DBUser:     getEnv("DB_USER", "tourguide"),
 		DBPassword: getEnv("DB_PASSWORD", "secret"),

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -48,19 +49,22 @@ func (r *sightRepo) GetByID(ctx context.Context, id int) (*entity.Sight, error) 
 
 func (r *sightRepo) List(ctx context.Context, filter repository.SightFilter) ([]*entity.Sight, error) {
 	baseQuery := `
-	SELECT DISTINCT s.id, s.img, s.lat, s.lon, s.short_desc, s.full_desc,
+	SELECT s.id, s.img, s.lat, s.lon, s.short_desc, s.full_desc,
 			COALESCE(s.timetable, ''), COALESCE(s.addr, ''), COALESCE(s.phone, ''), COALESCE(s.subway, ''),
 			s.created_at, s.updated_at
 	FROM tour_guide.sights s
-	LEFT JOIN sight_to_tag stt ON s.id = stt.sight_id
-	LEFT JOIN tags t ON stt.tag_id = t.id
-	WHERE ($3::text IS NULL OR t.name = $3)
+	WHERE EXISTS (
+	SELECT 1 FROM tour_guide.sight_to_tag stt
+	JOIN tour_guide.tags t ON stt.tag_id = t.id
+	WHERE stt.sight_id = s.id AND ($3::text IS NULL OR t.name = $3)
+	) OR $3::text IS NULL
 	ORDER BY s.id
 	LIMIT $1 OFFSET $2
 	`
 
 	rows, err := r.db.Query(ctx, baseQuery, filter.Limit, filter.Offset, filter.Tag)
 	if err != nil {
+		log.Printf("List: query failed: %v", err)
 		return nil, mapError(err)
 	}
 	defer rows.Close()
@@ -74,13 +78,18 @@ func (r *sightRepo) List(ctx context.Context, filter repository.SightFilter) ([]
 			&s.Timetable, &s.Addr, &s.Phone, &s.Subway,
 			&s.CreatedAt, &s.UpdatedAt,
 		); err != nil {
+			log.Printf("List: scan failed: %v", err)
 			return nil, err
 		}
 
 		s.Tags, _ = r.loadTags(ctx, s.ID)
 		sights = append(sights, &s)
 	}
-	return sights, rows.Err()
+	if err := rows.Err(); err != nil {
+		log.Printf("List: rows iteration failed: %v", err)
+		return nil, err
+	}
+	return sights, nil
 }
 
 func (r *sightRepo) loadTags(ctx context.Context, sightID int) ([]string, error) {
