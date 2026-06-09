@@ -3,6 +3,7 @@ package com.example.touristguide.presentation.ui.create_route_map_screen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -89,7 +90,7 @@ fun SightBottomSheetContent(
                 if (isExpanded) {
                     Modifier.verticalScroll(rememberScrollState())
                 } else {
-                    Modifier
+                    Modifier.fillMaxHeight()
                 }
             )
             .padding(horizontal = 20.dp)
@@ -104,7 +105,8 @@ fun SightBottomSheetContent(
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(top = 4.dp, bottom = 8.dp),
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 12.dp),
             tint = Color(0xFFBDBDBD)
         )
 
@@ -133,7 +135,18 @@ fun SightBottomSheetContent(
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(if (isExpanded) 12.dp else 8.dp))
+
+        if (!isExpanded) {
+            sight.subway?.takeIf { it.isNotBlank() }?.let { subway ->
+                Text(
+                    text = "м. $subway",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF757575)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
 
         if (isExpanded) {
             Text(
@@ -144,18 +157,16 @@ fun SightBottomSheetContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-        }
 
-        sight.subway?.takeIf { it.isNotBlank() }?.let { subway ->
-            Text(
-                text = "м. $subway",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF757575)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-        }
+            sight.subway?.takeIf { it.isNotBlank() }?.let { subway ->
+                Text(
+                    text = "м. $subway",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF757575)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
 
-        if (isExpanded) {
             sight.timetable?.takeIf { it.isNotBlank() }?.let { timetable ->
                 Text(
                     text = timetable,
@@ -174,6 +185,8 @@ fun SightBottomSheetContent(
                 Spacer(modifier = Modifier.height(4.dp))
             }
 
+            SightCategoriesText(categories = sight.categories)
+
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -182,5 +195,25 @@ fun SightBottomSheetContent(
             onAdd = onAdd,
             onRemove = onRemove
         )
+
+        if (!isExpanded) {
+            Spacer(modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+fun SightCategoriesText(
+    categories: List<String>,
+    modifier: Modifier = Modifier
+) {
+    if (categories.isNotEmpty()) {
+        Text(
+            text = "категории: ${categories.joinToString(", ")}",
+            modifier = modifier,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF757575)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
     }
 }

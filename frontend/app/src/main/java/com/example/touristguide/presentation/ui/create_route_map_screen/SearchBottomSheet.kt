@@ -166,6 +166,8 @@ private fun SightSearchCard(
             Spacer(modifier = Modifier.height(4.dp))
         }
 
+        SightCategoriesText(categories = sight.categories)
+
         Spacer(modifier = Modifier.height(12.dp))
 
         SightActionButton(

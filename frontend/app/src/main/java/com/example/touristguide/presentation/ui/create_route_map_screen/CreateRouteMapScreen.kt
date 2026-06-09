@@ -3,6 +3,7 @@ package com.example.touristguide.presentation.ui.create_route_map_screen
 import MapContainer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
@@ -111,6 +112,7 @@ fun CreateRouteMapScreen(
         sheetContent = {
             selectedSight?.let { sight ->
                 SightBottomSheetContent(
+                    modifier = Modifier.fillMaxWidth(),
                     sight = sight,
                     isExpanded = isSheetExpanded,
                     isAdded = sight.id in routeSightIds,
