@@ -27,7 +27,6 @@ func TestRouteEndpoints(t *testing.T) {
 		input := api.RouteInput{
 			UserId:       userID,
 			PlannedOrder: []int{1, 2, 3},
-			TotalTime:    ptr("2h 30m"),
 		}
 		reqBody, _ := json.Marshal(input)
 
@@ -47,7 +46,10 @@ func TestRouteEndpoints(t *testing.T) {
 
 		assert.Greater(t, route.Id, 0)
 		assert.Equal(t, userID, route.UserId)
-		assert.Equal(t, []int{1, 2, 3}, *route.PlannedOrder)
+		assert.NotNil(t, route.PlannedOrder)
+		assert.Equal(t, 1, (*route.PlannedOrder)[0].Id)
+		assert.Equal(t, 2, (*route.PlannedOrder)[1].Id)
+		assert.Equal(t, 3, (*route.PlannedOrder)[2].Id)
 		assert.Equal(t, api.RouteStatusPlanned, *route.Status)
 	})
 
@@ -95,7 +97,7 @@ func TestRouteEndpoints(t *testing.T) {
 	})
 
 	t.Run("DELETE /routes/{id} - success", func(t *testing.T) {
-		routeID := createTestRoute(t, env, userID, []int{1})
+		routeID := createTestRoute(t, env, userID, []int{1, 2})
 
 		url := fmt.Sprintf("%s/routes/%d", env.baseURL, routeID)
 		req, _ := http.NewRequest("DELETE", url, nil)
@@ -104,6 +106,21 @@ func TestRouteEndpoints(t *testing.T) {
 		defer resp.Body.Close()
 
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+
+		getResp, err := env.client.Get(fmt.Sprintf("%s/routes/%d", env.baseURL, routeID))
+		require.NoError(t, err)
+		defer getResp.Body.Close()
+		assert.Equal(t, http.StatusNotFound, getResp.StatusCode)
+	})
+
+	t.Run("DELETE /routes/{id} - not found", func(t *testing.T) {
+		url := fmt.Sprintf("%s/routes/%d", env.baseURL, 99999)
+		req, _ := http.NewRequest("DELETE", url, nil)
+		resp, err := env.client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 }
 
@@ -112,7 +129,6 @@ func createTestRoute(t *testing.T, env *testEnv, userID int, planned []int) int 
 	input := api.RouteInput{
 		UserId:       userID,
 		PlannedOrder: planned,
-		TotalTime:    ptr("1h"),
 	}
 	reqBody, _ := json.Marshal(input)
 

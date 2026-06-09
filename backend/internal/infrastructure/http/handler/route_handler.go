@@ -160,3 +160,16 @@ func (h *RouteHandler) GetRoutesInProgress(w http.ResponseWriter, r *http.Reques
 		},
 	)
 }
+
+func (h *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request, routeId int) {
+    withSights, err := h.service.GetRouteWithSights(r.Context(), routeId)
+    if err != nil {
+        if err == domain.ErrNotFound {
+            respondError(w, http.StatusNotFound, "Route not found")
+            return
+        }
+        respondError(w, http.StatusInternalServerError, "Failed to fetch route")
+        return
+    }
+    respondJSON(w, http.StatusOK, mappers.ToAPIRouteWithSights(withSights))
+}

@@ -391,6 +391,30 @@ paths:
                   $ref: '#/components/schemas/Route'
 
   /routes/{routeId}:
+    get:
+      summary: Получить маршрут по ID
+      tags: [Routes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Маршрут найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+        '404':
+          description: Маршрут не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     put:
       summary: Обновить маршрут
       tags: [Routes]

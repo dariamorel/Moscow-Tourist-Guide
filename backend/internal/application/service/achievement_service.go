@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 
 	"tour-guide/internal/domain"
 	"tour-guide/internal/domain/entity"
@@ -34,43 +35,55 @@ func (s *AchievementService) ListCompletedByUser(ctx context.Context, userID int
 }
 
 func (s *AchievementService) CheckAndUpdate(ctx context.Context, userID int) error {
-	if userID <= 0 {
-		return domain.ErrInvalidInput
-	}
+    log.Printf("CheckAndUpdate: userID=%d", userID)
+    
+    if userID <= 0 {
+        return domain.ErrInvalidInput
+    }
 
-	stats, err := s.collectUserStats(ctx, userID)
-	if err != nil {
-		return err
-	}
+    stats, err := s.collectUserStats(ctx, userID)
+    if err != nil {
+        log.Printf("CheckAndUpdate: collectUserStats failed: %v", err)
+        return err
+    }
 
-	allAchievements, err := s.repo.ListAll(ctx, 0)
-	if err != nil {
-	return err
-	}
+    log.Printf("CheckAndUpdate: stats.CompletedRoutes=%d, stats.TotalUniqueSights=%d", 
+        stats.CompletedRoutes, stats.TotalUniqueSights)
 
-	for _, ach := range allAchievements {
-		var progress int
-		switch ach.Type {
-		case entity.AchievementSightsVisited:
-			progress = stats.TotalUniqueSights
-		case entity.AchievementRoutesCompleted:
-			progress = stats.CompletedRoutes
-		case entity.AchievementTagCollector:
-			progress = stats.SightsByTag[ach.Tag]
-		default:
-			continue
-		}
+    allAchievements, err := s.repo.ListAll(ctx, 0)
+    if err != nil {
+        log.Printf("CheckAndUpdate: ListAll failed: %v", err)
+        return err
+    }
 
-		ua := &entity.UserAchievement{
-			UserID:        userID,
-			AchievementID: ach.ID,
-			Progress:      progress,
-		}
-		if err := s.repo.UpdateProgress(ctx, ua); err != nil {
-			return err
-		}
-	}
-	return nil
+    for _, ach := range allAchievements {
+        var progress int
+        switch ach.Type {
+        case entity.AchievementSightsVisited:
+            progress = stats.TotalUniqueSights
+        case entity.AchievementRoutesCompleted:
+            progress = stats.CompletedRoutes
+        case entity.AchievementTagCollector:
+            progress = stats.SightsByTag[ach.Tag]
+        default:
+            continue
+        }
+
+        log.Printf("CheckAndUpdate: achievement %d (%s), progress=%d", ach.ID, ach.Type, progress)
+
+        ua := &entity.UserAchievement{
+            UserID:        userID,
+            AchievementID: ach.ID,
+            Progress:      progress,
+        }
+        if err := s.repo.UpdateProgress(ctx, ua); err != nil {
+            log.Printf("CheckAndUpdate: UpdateProgress failed for achievement %d: %v", ach.ID, err)
+            return err
+        }
+    }
+    
+    log.Printf("CheckAndUpdate: completed successfully")
+    return nil
 }
 
 type userStats struct {

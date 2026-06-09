@@ -72,16 +72,25 @@ func seedTestData(t *testing.T, db *pgxpool.Pool) {
 	ctx := context.Background()
 	
 	_, err := db.Exec(ctx, `
-	INSERT INTO sights (id, img, lat, lon, short_desc, full_desc, addr)
+	INSERT INTO tour_guide.sights (id, img, lat, lon, short_desc, full_desc, addr)
 	VALUES 
-	(1, 'https://example.com/red-square.jpg', 55.7539, 37.6208, 'Красная площадь', 'Главная площадь Москвы', 'Москва, Красная площадь'),
-	(2, 'https://example.com/kremlin.jpg', 55.7520, 37.6175, 'Московский Кремль', 'Исторический центр', 'Москва, Кремль'),
-	(3, 'https://example.com/stbasil.jpg', 55.7525, 37.6231, 'Храм Василия Блаженного', 'Православный храм', 'Москва, Красная площадь, 2')
+	(1, 'https://example.com/1.jpg', 55.7539, 37.6208, 'Красная площадь', 'Главная площадь', 'Москва'),
+	(2, 'https://example.com/2.jpg', 55.7520, 37.6175, 'Кремль', 'Исторический центр', 'Москва'),
+	(3, 'https://example.com/3.jpg', 55.7525, 37.6231, 'Храм Василия', 'Православный храм', 'Москва')
 	`)
 	require.NoError(t, err)
 
 	_, err = db.Exec(ctx, `
-	INSERT INTO achievements (id, type, name, description, required_count)
+	INSERT INTO tour_guide.time_between_sights (sight1_id, sight2_id, travel_time, distance_meters)
+	VALUES 
+	(1, 2, INTERVAL '15 minutes', 1200), (2, 1, INTERVAL '15 minutes', 1200),
+	(2, 3, INTERVAL '20 minutes', 1500), (3, 2, INTERVAL '20 minutes', 1500),
+	(1, 3, INTERVAL '10 minutes', 800),  (3, 1, INTERVAL '10 minutes', 800)
+	`)
+	require.NoError(t, err)
+
+	_, err = db.Exec(ctx, `
+	INSERT INTO tour_guide.achievements (id, type, name, description, required_count)
 	VALUES 
 	(1, 'sights_visited', 'Первые шаги', 'Посетите первую достопримечательность', 1),
 	(2, 'routes_completed', 'Путешественник', 'Завершите 3 маршрута', 3)
@@ -120,22 +129,26 @@ func setupTestEnv(t *testing.T) *testEnv {
 	routeRepo := pg.NewRouteRepo(db)
 	userRepo := pg.NewUserRepo(db)
 	achievementRepo := pg.NewAchievementRepo(db)
+	routeOptimizer := pg.NewRouteOptimizer(db)
 
 	sightService := service.NewSightService(sightRepo)
-	routeService := service.NewRouteService(routeRepo, sightRepo)
+	achievementService := service.NewAchievementService(achievementRepo, sightRepo, routeRepo)
+	routeService := service.NewRouteService(routeRepo, sightRepo, achievementService, routeOptimizer)
 	authService := service.NewAuthService(userRepo)
-	achievementService := service.NewAchievementService(achievementRepo)
+	routeOptimizationService := service.NewRouteOptimizationService(sightRepo, routeOptimizer)
 
 	sightHandler := handler.NewSightHandler(sightService)
 	routeHandler := handler.NewRouteHandler(routeService)
 	authHandler := handler.NewAuthHandler(authService)
 	achievementHandler := handler.NewAchievementHandler(achievementService)
+	routeOptimizationHandler := handler.NewRouteOptimizationHandler(routeOptimizationService)
 
 	serverImpl := &apiServerImpl{
 		sightHandler:       sightHandler,
 		routeHandler:       routeHandler,
 		authHandler:        authHandler,
 		achievementHandler: achievementHandler,
+		routeOptimizationHandler: routeOptimizationHandler,
 	}
 
 	r := chi.NewRouter()
@@ -163,10 +176,11 @@ func (e *testEnv) teardown() {
 }
 
 type apiServerImpl struct {
-	sightHandler       *handler.SightHandler
-	routeHandler       *handler.RouteHandler
-	authHandler        *handler.AuthHandler
-	achievementHandler *handler.AchievementHandler
+	sightHandler             *handler.SightHandler
+	routeHandler             *handler.RouteHandler
+	authHandler              *handler.AuthHandler
+	achievementHandler       *handler.AchievementHandler
+	routeOptimizationHandler *handler.RouteOptimizationHandler
 }
 
 func (s *apiServerImpl) GetSightsSightId(w http.ResponseWriter, r *http.Request, sightId int) {
@@ -213,14 +227,18 @@ func (s *apiServerImpl) PostUsersLogin(w http.ResponseWriter, r *http.Request) {
  	s.authHandler.Login(w, r)
 }
 
-func (s *apiServerImpl) GetAchievements(w http.ResponseWriter, r *http.Request) {
- 	s.achievementHandler.GetAchievements(w, r)
+func (s *apiServerImpl) GetAchievements(w http.ResponseWriter, r *http.Request, params api.GetAchievementsParams) {
+ 	s.achievementHandler.GetAchievements(w, r, params)
 }
 
 func (s *apiServerImpl) GetAchievementsCompleted(w http.ResponseWriter, r *http.Request, params api.GetAchievementsCompletedParams) {
  	s.achievementHandler.GetAchievementsCompleted(w, r, params)
 }
 
-func (s *apiServerImpl) PutAchievements(w http.ResponseWriter, r *http.Request) {
- 	s.achievementHandler.UpdateAchievements(w, r)
+func (s *apiServerImpl) PostRoutesOptimize(w http.ResponseWriter, r *http.Request) {
+	s.routeOptimizationHandler.OptimizeRoute(w, r)
+}
+
+func (s *apiServerImpl) GetRoutesRouteId(w http.ResponseWriter, r *http.Request, routeId int) {
+    s.routeHandler.GetRoute(w, r, routeId)
 }

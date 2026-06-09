@@ -151,12 +151,27 @@ func (s *RouteService) DeleteRoute(ctx context.Context, routeID int) error {
 
 	exists, err := s.routeRepo.GetByID(ctx, routeID)
 	if err != nil {
+		log.Printf("Delete route: GetByID failed: %s", err.Error())
 		return err
 	}
 	if exists == nil {
+		log.Printf("Delete route: Route not found")
 		return domain.ErrNotFound
 	}
-	return s.routeRepo.Delete(ctx, routeID)
+	
+	if err := s.routeRepo.Delete(ctx, routeID); err != nil {
+		log.Printf("Delete route failed: %s", err.Error())
+		return err
+	}
+
+	if exists.Status == entity.StatusCompleted {
+		log.Printf("Delete route: updating achievements")
+		if err := s.achievementSvc.CheckAndUpdate(ctx, exists.UserID); err != nil {
+			return fmt.Errorf("Warning: failed to recalculate achievement progress after route deletion: %w", err)
+		}
+	}
+
+	return nil
 }
 
 type RouteWithSights struct {

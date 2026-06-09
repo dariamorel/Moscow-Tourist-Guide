@@ -118,6 +118,10 @@ func (s *apiServerImpl) PostRoutesOptimize(w http.ResponseWriter, r *http.Reques
 	s.routeOptimizationHandler.OptimizeRoute(w, r)
 }
 
+func (s *apiServerImpl) GetRoutesRouteId(w http.ResponseWriter, r *http.Request, routeId int) {
+    s.routeHandler.GetRoute(w, r, routeId)
+}
+
 func main() {
 	cfg := loadConfig()
 
