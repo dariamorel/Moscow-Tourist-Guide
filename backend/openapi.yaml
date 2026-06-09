@@ -69,8 +69,8 @@ components:
           type: array
           description: "Полный запланированный маршрут"
           items:
-            type: integer
-          example: [1, 2, 3, 4, 5]
+            $ref: '#/components/schemas/Sight'
+          example: []
         total_time:
           type: string
           example: "2h 30m"
@@ -202,18 +202,10 @@ components:
         tag:
           type: string
           nullable: true
-
-    UserAchievementInput:
-      type: object
-      required: [user_id, achievement_id]
-      properties:
-        user_id:
-          type: integer
-        achievement_id:
-          type: integer
         progress:
           type: integer
-          minimum: 0
+          description: "Текущий прогресс пользователя"
+          default: 0
 
     Error:
       type: object
@@ -551,6 +543,12 @@ paths:
     get:
       summary: Получить все достижения
       tags: [Achievements]
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: Список достижений
@@ -560,26 +558,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Achievement'
-    put:
-      summary: Обновить достижения пользователя
-      tags: [Achievements]
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserAchievementInput'
-      responses:
-        '200':
-          description: Достижения обновлены
-        '400':
-          description: Ошибка валидации
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
   /achievements/completed:
     get:

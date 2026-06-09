@@ -120,10 +120,13 @@ func (e GetRoutesParamsStatus) Valid() bool {
 
 // Achievement defines model for Achievement.
 type Achievement struct {
-	Description   *string          `json:"description,omitempty"`
-	IconUrl       *string          `json:"icon_url,omitempty"`
-	Id            *int             `json:"id,omitempty"`
-	Name          *string          `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	IconUrl     *string `json:"icon_url,omitempty"`
+	Id          *int    `json:"id,omitempty"`
+	Name        *string `json:"name,omitempty"`
+
+	// Progress Текущий прогресс пользователя
+	Progress      *int             `json:"progress,omitempty"`
 	RequiredCount *int             `json:"required_count,omitempty"`
 	Tag           *string          `json:"tag,omitempty"`
 	Type          *AchievementType `json:"type,omitempty"`
@@ -139,6 +142,30 @@ type Error struct {
 	Message string                  `json:"message"`
 }
 
+// OptimizeRouteInput defines model for OptimizeRouteInput.
+type OptimizeRouteInput struct {
+	// EndId ID конечной точки (всегда последняя)
+	EndId int `json:"end_id"`
+
+	// SightIds ID достопримечательностей для оптимизации (без start/end)
+	SightIds []int `json:"sight_ids"`
+
+	// StartId ID начальной точки (всегда первая)
+	StartId int `json:"start_id"`
+}
+
+// OptimizeRouteOutput defines model for OptimizeRouteOutput.
+type OptimizeRouteOutput struct {
+	// OptimizedOrder Оптимизированный порядок обхода (включая start/end)
+	OptimizedOrder *[]int `json:"optimized_order,omitempty"`
+
+	// TotalDistance Общее расстояние в метрах
+	TotalDistance *int `json:"total_distance,omitempty"`
+
+	// TotalTime Общее время в формате '2h 15m'
+	TotalTime *string `json:"total_time,omitempty"`
+}
+
 // Route defines model for Route.
 type Route struct {
 	Date time.Time `json:"date"`
@@ -148,7 +175,7 @@ type Route struct {
 	Order *[]int `json:"order,omitempty"`
 
 	// PlannedOrder Полный запланированный маршрут
-	PlannedOrder *[]int       `json:"planned_order,omitempty"`
+	PlannedOrder *[]Sight     `json:"planned_order,omitempty"`
 	Status       *RouteStatus `json:"status,omitempty"`
 	TotalTime    *string      `json:"total_time,omitempty"`
 	UserId       int          `json:"user_id"`
@@ -201,13 +228,6 @@ type User struct {
 	Login     *string    `json:"login,omitempty"`
 }
 
-// UserAchievementInput defines model for UserAchievementInput.
-type UserAchievementInput struct {
-	AchievementId int  `json:"achievement_id"`
-	Progress      *int `json:"progress,omitempty"`
-	UserId        int  `json:"user_id"`
-}
-
 // UserInput defines model for UserInput.
 type UserInput struct {
 	Login    string `json:"login"`
@@ -216,6 +236,11 @@ type UserInput struct {
 
 // bearerAuthContextKey is the context key for BearerAuth security scheme
 type bearerAuthContextKey string
+
+// GetAchievementsParams defines parameters for GetAchievements.
+type GetAchievementsParams struct {
+	UserId *int `form:"user_id,omitempty" json:"user_id,omitempty"`
+}
 
 // GetAchievementsCompletedParams defines parameters for GetAchievementsCompleted.
 type GetAchievementsCompletedParams struct {
@@ -257,11 +282,11 @@ type GetSightsParams struct {
 	Tag *string `form:"tag,omitempty" json:"tag,omitempty"`
 }
 
-// PutAchievementsJSONRequestBody defines body for PutAchievements for application/json ContentType.
-type PutAchievementsJSONRequestBody = UserAchievementInput
-
 // PostRoutesJSONRequestBody defines body for PostRoutes for application/json ContentType.
 type PostRoutesJSONRequestBody = RouteInput
+
+// PostRoutesOptimizeJSONRequestBody defines body for PostRoutesOptimize for application/json ContentType.
+type PostRoutesOptimizeJSONRequestBody = OptimizeRouteInput
 
 // PutRoutesRouteIdJSONRequestBody defines body for PutRoutesRouteId for application/json ContentType.
 type PutRoutesRouteIdJSONRequestBody = RouteUpdateInput
@@ -276,10 +301,7 @@ type PostUsersRegistrationJSONRequestBody = UserInput
 type ServerInterface interface {
 	// Получить все достижения
 	// (GET /achievements)
-	GetAchievements(w http.ResponseWriter, r *http.Request)
-	// Обновить достижения пользователя
-	// (PUT /achievements)
-	PutAchievements(w http.ResponseWriter, r *http.Request)
+	GetAchievements(w http.ResponseWriter, r *http.Request, params GetAchievementsParams)
 	// Получить завершённые достижения пользователя
 	// (GET /achievements/completed)
 	GetAchievementsCompleted(w http.ResponseWriter, r *http.Request, params GetAchievementsCompletedParams)
@@ -295,6 +317,9 @@ type ServerInterface interface {
 	// Получить маршруты в процессе
 	// (GET /routes/in_progress)
 	GetRoutesInProgress(w http.ResponseWriter, r *http.Request, params GetRoutesInProgressParams)
+	// Оптимизировать порядок обхода достопримечательностей
+	// (POST /routes/optimize)
+	PostRoutesOptimize(w http.ResponseWriter, r *http.Request)
 	// Получить завершённые маршруты
 	// (GET /routes/passed)
 	GetRoutesPassed(w http.ResponseWriter, r *http.Request, params GetRoutesPassedParams)
@@ -324,13 +349,7 @@ type Unimplemented struct{}
 
 // Получить все достижения
 // (GET /achievements)
-func (_ Unimplemented) GetAchievements(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Обновить достижения пользователя
-// (PUT /achievements)
-func (_ Unimplemented) PutAchievements(w http.ResponseWriter, r *http.Request) {
+func (_ Unimplemented) GetAchievements(w http.ResponseWriter, r *http.Request, params GetAchievementsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -361,6 +380,12 @@ func (_ Unimplemented) GetRoutesDeclined(w http.ResponseWriter, r *http.Request,
 // Получить маршруты в процессе
 // (GET /routes/in_progress)
 func (_ Unimplemented) GetRoutesInProgress(w http.ResponseWriter, r *http.Request, params GetRoutesInProgressParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Оптимизировать порядок обхода достопримечательностей
+// (POST /routes/optimize)
+func (_ Unimplemented) PostRoutesOptimize(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -418,28 +443,27 @@ type MiddlewareFunc func(http.Handler) http.Handler
 // GetAchievements operation middleware
 func (siw *ServerInterfaceWrapper) GetAchievements(w http.ResponseWriter, r *http.Request) {
 
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetAchievements(w, r)
-	}))
+	var err error
+	_ = err
 
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAchievementsParams
+
+	// ------------- Optional query parameter "user_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "user_id", r.URL.Query(), &params.UserId, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "user_id"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
+		}
+		return
 	}
 
-	handler.ServeHTTP(w, r)
-}
-
-// PutAchievements operation middleware
-func (siw *ServerInterfaceWrapper) PutAchievements(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PutAchievements(w, r)
+		siw.Handler.GetAchievements(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -629,6 +653,26 @@ func (siw *ServerInterfaceWrapper) GetRoutesInProgress(w http.ResponseWriter, r 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetRoutesInProgress(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostRoutesOptimize operation middleware
+func (siw *ServerInterfaceWrapper) PostRoutesOptimize(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRoutesOptimize(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -971,9 +1015,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/achievements", wrapper.GetAchievements)
 	})
 	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/achievements", wrapper.PutAchievements)
-	})
-	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/achievements/completed", wrapper.GetAchievementsCompleted)
 	})
 	r.Group(func(r chi.Router) {
@@ -987,6 +1028,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/routes/in_progress", wrapper.GetRoutesInProgress)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/routes/optimize", wrapper.PostRoutesOptimize)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/routes/passed", wrapper.GetRoutesPassed)
@@ -1018,42 +1062,47 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"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",
-	"fSOrDoGr5bIbNKjbCiJRvV+pVEi71v5fAAAA//8=",
+	"7Fv/b9vGFf9XiFuBdhhjyd/WVr+5y1q4KBqjSVBghiYw4lliJ5Lq8ZjWNQzI8tKkiDFvQH/b2qzr/gBZ",
+	"sWrFjuR/4d1/NLw7USKlo0TFtpYCAYomOh7v3nufz71vx+yRsu/WfY96PCCFPRKUq9S15F83ylWHPqQu",
+	"9Tj+rDO/Thl3qHxo06DMnDp3fA9/8t06JQUScOZ4FbJvEqfse6WQ1fDhjs9ci5MCCZlDTM1cO7aE43Fa",
+	"oQzHPcul2sXrzK8wGgwE2bHCGieFvJkUisB/oAPn4lB8B114YcClaEAfnosGdMSBODDgEvpwIY7gDPrQ",
+	"hpZoQgcuxPFIxJgsjH4ZOozapbIfKntMzuFWBR94Ya1mPahRUuAspBp91cAeoV7oksI2CZxKlQelh07g",
+	"cGoTkzA/5DQoITI1qoa4VSmV/VqNlrnPSHFi1eGyxH/wBS1z3OePjPlsErqyb6vtv7ZwfVIgn965V/rw",
+	"zv1Pb+vQsSm3nJp807JtB41r1bZiKya0HO3u0iCwKmM7wffQFweiCX0JRxdeQkc8Htr+CHrquTgyoAcd",
+	"/F8LXsApdPBvRKd2hAxaUqo22rqoEetOnTuu8w39DG286dVDDbmpZ5cUKZOM2rxtwDn0UTLxGEWFFwbq",
+	"Ih7DOXSNd6AtDqADz+EUWpJe4gAuoAOn0BPH4vi3xByZYl3HMsmEkmMH+r1PsxkPOkj3U+SyIec25dwu",
+	"nEFLfAtdKeoJdODMCLjFeI56dkK27RVz1VwrmsTh1A1SyK5GLMasXSk6rpRqtR60UNJIyhl264iGPJBJ",
+	"iy1PWmwM/pH5YvKYEZwz2XAn5Fo6+INJdslnNmWTGsKPCSN3paNpQwt60BNPpe+BvmiIY0QQzhGUE/EI",
+	"+lLfd6AN53Ah/iahPE6DZNlcNVfMNXN9Pli4z61ayXYCbnllqhX9RHwHHegYogEtdIwSmWPoQRcPYNuQ",
+	"NGvKp4/iIq2t5/M6EqstueNO3w7a6InhJZK0bYi/ooXgpWKz8fZK1Vhed9+O70fUGMnk+ySgmrBlqdFh",
+	"SMKBW1LWOQJTGg2eSeAjd4XQd7IfWjwHl9CPc+VcHE6QYD746zXL86YQ9xmGwIikZ9CCS7iQvNVwGLFp",
+	"iCeiIQ5FMyFWXKa3GN0hBfKb3CivyA2SitxdPJ8pzoOHQTwmDgQnJnG80jDemyQeE21arjk4qRhnSXL+",
+	"ZPBNsDNBrtW8q3sjDCgr6akw5n+kt4mmm4psxTRypsSeDIileZJ54gOZSiPX8TbV0+U0lxJZ8ArmGlkq",
+	"qXSqye7X0aRDw41Z5vshWTux6Hci401bxmGk9fEYkWVWMebv3xxv4x1MkuECugb0xCH8gnoYMrq9HBiy",
+	"KY7GpZdpw7wR6jU++7rAonzYxLG1bJtpjwMioq+QUoKL41ayFE01iyeUWF9fend9eWVtzYwFNz/EOmT4",
+	"the6D9QmNVW2Dd9efXfp98vvra2sZnq7XvU9/eEPqj7jpVSdg/DBV9au9hG3KkFCpG0CL8UhnA28FXQH",
+	"mUkDDzHRcGy8wIp5LMelXJVkezMqCOmOEAJlYWWphF4DSHVO6n5AdfUWoxandkkBdrXMo+ZXHE+vhVaa",
+	"lCAzXMa1vv6EehVeJYX1vPT70c9Vk9QtzilDR/LnbevWNxu3/pS/9X7pVvF3b+lErltB8JXP7ISSw0Ez",
+	"vtVyPrnXe7PqOiVvbI9J6yO7aDlkDt+9i+mGUvQDajHKNkLcZY88kL8+jIT7+PN7CK2cTQqDpyPVqpzX",
+	"yT4u7Hg7/qR33djajOIMJsdwAn3RFE8NcZA5KohjLBnMiZCEowb+l9KiwOdLKKnDpQO754fM+Ch0bGps",
+	"bG0SkzykLFBSLi/ll/Iyaa1Tz6o7pEBWl/JLq9KavCqtlLNGrR45UKFcFT6UWajtpk0K5CPKN+LzcAFm",
+	"uZRTFpDC9h5BSpEvQ8p2SdS8icV4lQRq04Iioh3UfS9QqK3k86pR4fFB88mq12tOWcqS+yJQzmu0YKbk",
+	"M97OmvAR+/sT3aOf4BJ9jkqzIjy78IsKf/BCUS50XYvtDmOtOBSPVWw0VFGreVV1mKS72yYJixZxyQQY",
+	"uVHMywjLH2JBci58RudNNXR+1XhhrtOGjjxT/1A5jng0BcaB55BmivuM7SIqOw1lzU4pqE9tOKbTQTUD",
+	"p8H/mZpxc3ibE4nlf6GLmoimaEi1DKlsSzTFoTgQhzJ1m9x8kOrF93rVnG88XiyEkqqpMDcZk869D21c",
+	"Yi2/PJeA0+RSjV6dHD8gF1vQjjKniHrQuyrvE0qJp1nIPeBpEZMFP9BwecsPRmRGftKAf+Dbu9dmqFjh",
+	"vZ/MMfAM7E9waPl6d9ZC9K9E3SU5c4blPEKENMkvgCY/iifQhRM4h5Yh6XEBXZRBdYvnpMpPkQZRG78P",
+	"bX0HaYIYI3+XGx72mY7vdjTzVx7wrs+7XO1k90UTzuEC+tCLR7SxAz8DvrgXn4ngprc18vhvMLwGDCe8",
+	"c3tw/ym+Vbef0JkBYHTpIYvHGd46ukW5Ia+tubLL5L3zNyPB4JpI60dn3QMlPeBr499RjrUFyHG129/5",
+	"zkQKFmr1y2vrok87Q3UrCLJEsC01743vuxbfl1KRzRe/9uSfm/a+6vtgCTIJ4G05rl5XzikNxLrFqyMM",
+	"2XDulTBc03T8f5apo7rs6C/uYP8wflr7c6IYya2LXyklRKiLSSFfJBw3VKHE77kWHOmy1inxmzU8ZYuj",
+	"2pgc43Fi7igRqZGVeegk1Bdb0xz7XTUjk0uvOa7DE12R4UdtK3nZOHfc0B20zXXNGd2i/s5OQFNWTVlm",
+	"Zo8HY97z1O4Otyq6Nu9iWzQpnxhk7e9mifkz+r7i4FUXHpFtwJ442XJ78s9BRJpOu7tqZibnFwznLjCf",
+	"yICgBrGfpWk74kmUTWOlipG++f8PdFPykdPsSS+ess3baUTA1C/IDe/u0quy+zjxk8Gd2U1EqdHV4g2E",
+	"p+RVJff/Qr3JROfjz+/JTwjhXDr9lM92suihuzzNQr62qhgW2stVeW0kwQX04Tl0oWegp1bXhS1Z51yI",
+	"o3Fa/j3RBJaVX8YrCQyccQIyWnECriiXgYefxae/FnRcvtaNtVg905r1yBCHIxpBX9Yq8ivI5+rzBvlx",
+	"Q2PUokdqvb8Aav1zxCSsnnriGH1qkkD/Toj5CgSSeRl7GMUijQjn0RfCkt/iYPAhcEc0iEnkPyaQl/KF",
+	"XK7ml61a1Q944b18Pk/2i/v/CwAA//8=",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,
