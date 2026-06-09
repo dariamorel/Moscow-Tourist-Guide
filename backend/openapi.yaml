@@ -465,7 +465,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OptimizeRouteResponse'
         '400':
-          description: Некорректный запрос (меньше 2 точек)
+          description: Некорректный запрос (меньше 2 или больше 19 точек)
           content:
             application/json:
               schema:

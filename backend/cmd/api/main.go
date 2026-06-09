@@ -59,6 +59,7 @@ type apiServerImpl struct {
 	routeHandler       *handler.RouteHandler
 	authHandler        *handler.AuthHandler
 	achievementHandler *handler.AchievementHandler
+	routeOptimizationHandler *handler.RouteOptimizationHandler
 }
 
 func (s *apiServerImpl) GetSightsSightId(w http.ResponseWriter, r *http.Request, sightId int) {
@@ -113,6 +114,10 @@ func (s *apiServerImpl) GetAchievementsCompleted(w http.ResponseWriter, r *http.
  	s.achievementHandler.GetAchievementsCompleted(w, r, params)
 }
 
+func (s *apiServerImpl) PostRoutesOptimize(w http.ResponseWriter, r *http.Request) {
+	s.routeOptimizationHandler.OptimizeRoute(w, r)
+}
+
 func main() {
 	cfg := loadConfig()
 
@@ -132,22 +137,26 @@ func main() {
 	routeRepo := postgres.NewRouteRepo(db)
 	userRepo := postgres.NewUserRepo(db)
 	achievementRepo := postgres.NewAchievementRepo(db)
+	routeOptimizaer := postgres.NewRouteOptimizer(db)
 
 	sightService := service.NewSightService(sightRepo)
 	authService := service.NewAuthService(userRepo)
 	achievementService := service.NewAchievementService(achievementRepo, sightRepo, routeRepo)
 	routeService := service.NewRouteService(routeRepo, sightRepo, achievementService)
+	routeOptimizationService := service.NewRouteOptimizationService(sightRepo, routeOptimizaer)
 
 	sightHandler := handler.NewSightHandler(sightService)
 	routeHandler := handler.NewRouteHandler(routeService)
 	authHandler := handler.NewAuthHandler(authService)
 	achievementHandler := handler.NewAchievementHandler(achievementService)
+	routeOptimizationHandler := handler.NewRouteOptimizationHandler(routeOptimizationService)
 
 	serverImpl := &apiServerImpl{
-		sightHandler:       sightHandler,
-		routeHandler:       routeHandler,
-		authHandler:        authHandler,
-		achievementHandler: achievementHandler,
+		sightHandler:             sightHandler,
+		routeHandler:             routeHandler,
+		authHandler:              authHandler,
+		achievementHandler:       achievementHandler,
+		routeOptimizationHandler: routeOptimizationHandler,
 	}
 
 	r := chi.NewRouter()
