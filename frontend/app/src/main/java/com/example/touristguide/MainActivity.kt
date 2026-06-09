@@ -10,36 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.touristguide.data.repository.TestRepository
-import com.example.touristguide.domain.entities.Route
-import com.example.touristguide.presentation.ui.ChooseSightsScreen
-import com.example.touristguide.presentation.ui.MyRoutesScreen
-import com.example.touristguide.presentation.ui.RouteScreen
-import com.example.touristguide.presentation.viewModel.MapViewModel
-import com.example.touristguide.presentation.viewModel.RouteViewModel
-import com.example.touristguide.presentation.viewModel.SightsViewModel
+import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteMapScreen
 import com.example.touristguide.ui.theme.TouristGuideTheme
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val mapViewModel = MapViewModel()
-        val repository = TestRepository()
-        val sightsViewModel = SightsViewModel(repository)
-        val routeViewModel = RouteViewModel(repository)
 
         enableEdgeToEdge()
         setContent {
@@ -48,60 +30,27 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background
                 ) { innerPadding ->
-                    MainScreen(sightsViewModel, mapViewModel, routeViewModel, Modifier.padding(innerPadding))
+                    MainScreen(Modifier.padding(innerPadding))
                 }
             }
         }
     }
 }
 
-enum class Screens(val title: String) {
-    MY_ROUTES("Мои маршруты"), CREATE_ROUTE("Создание маршрута"),
-    ACTIVE_ROUTE("Активный маршрут")
+enum class Screens {
+    CREATE_ROUTE_MAP
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(
-    sightsViewModel: SightsViewModel,
-    mapViewModel: MapViewModel,
-    routeViewModel: RouteViewModel,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Screens.MY_ROUTES.title) {
-        composable(Screens.MY_ROUTES.title) {
-            MyRoutesScreen(
-                navController = navController,
-                viewModel = routeViewModel,
-                modifier = modifier
-            )
-        }
-
-        composable(Screens.CREATE_ROUTE.title) {
-            ChooseSightsScreen(
-                navController = navController,
-                mapViewModel = mapViewModel,
-                sightsViewModel = sightsViewModel,
-                modifier = modifier
-            )
-        }
-
-        composable(
-            "${Screens.ACTIVE_ROUTE.title}/{routeId}",
-            arguments = listOf(
-                navArgument("routeId") {
-                    type = NavType.IntType
-                }
-            )
-            ) { backStackEntry ->
-            val routeId = backStackEntry.arguments?.getInt("routeId") ?: 0
-            val routes by routeViewModel.allRoutes.collectAsState()
-            val route = routes.find { it.id == routeId } ?: Route()
-            RouteScreen(
-                route = route,
-                routeViewModel = routeViewModel,
+    NavHost(navController = navController, startDestination = Screens.CREATE_ROUTE_MAP.name) {
+        composable(Screens.CREATE_ROUTE_MAP.name) {
+            CreateRouteMapScreen(
                 modifier = modifier
             )
         }

@@ -1,4 +1,4 @@
-package com.example.touristguide.presentation.ui.components.map
+package com.example.touristguide.presentation.map_layer
 
 import android.content.Context
 import android.graphics.Canvas
@@ -46,20 +46,32 @@ fun MapMarkers(
     }
 
     LaunchedEffect(sights) {
+
+        mapView.overlays.removeAll {
+            it is FolderOverlay
+        }
+
+        val markersOverlay = FolderOverlay()
+
         sights.forEach { sight ->
             val marker = Marker(mapView).apply {
                 position = sight.coords
                 title = sight.title
+                icon = resizeDrawable(
+                    ctx,
+                    R.drawable.maps_icon,
+                    48
+                )
                 setOnMarkerClickListener { _, _ ->
                     onMarkerClick(sight)
                     true
                 }
-                icon = resizeDrawable(ctx, R.drawable.maps_icon, 48)
             }
             markersOverlay.add(marker)
         }
 
         mapView.overlays.add(markersOverlay)
+        mapView.invalidate()
     }
 }
 

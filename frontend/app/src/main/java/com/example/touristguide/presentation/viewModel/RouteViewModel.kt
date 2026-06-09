@@ -38,7 +38,7 @@ class RouteViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateRoute(
                 route.id, route.copy(
-                    isPassed = route.isPassed.toMutableList().apply { this[sightIdx] = newStatus }
+                    isPassed = route.isPassed.toMutableMap().apply { this[sightIdx] = newStatus }
                 )
             )
         }
