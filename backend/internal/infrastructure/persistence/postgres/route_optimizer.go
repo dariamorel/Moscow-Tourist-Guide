@@ -13,15 +13,15 @@ import (
 	domainservices "tour-guide/internal/domain/service"
 )
 
-type routeOptimizer struct {
+type RouteOptimizer struct {
  	db *pgxpool.Pool
 }
 
 func NewRouteOptimizer(db *pgxpool.Pool) domainservices.RouteOptimizer {
-  	return &routeOptimizer{db: db}
+  	return &RouteOptimizer{db: db}
 }
 
-func (o *routeOptimizer) Optimize(ctx context.Context, sights []*entity.Sight) (*domainservices.OptimizationResult, error) {
+func (o *RouteOptimizer) Optimize(ctx context.Context, sights []*entity.Sight) (*domainservices.OptimizationResult, error) {
 	n := len(sights)
 	
 	if n > 20 {
@@ -116,7 +116,7 @@ func (o *routeOptimizer) Optimize(ctx context.Context, sights []*entity.Sight) (
 	}, nil
 }
 
-func (o *routeOptimizer) buildTimeMatrix(ctx context.Context, sights []*entity.Sight) ([][]float64, error) {
+func (o *RouteOptimizer) buildTimeMatrix(ctx context.Context, sights []*entity.Sight) ([][]float64, error) {
 	n := len(sights)
 	ids := make([]int, n)
 	for i, s := range sights {
@@ -165,7 +165,7 @@ func (o *routeOptimizer) buildTimeMatrix(ctx context.Context, sights []*entity.S
 	return matrix, nil
 }
 
-func (o *routeOptimizer) getTravelTimeFromCache(cache map[string]float64, s1, s2 int) (float64, error) {
+func (o *RouteOptimizer) getTravelTimeFromCache(cache map[string]float64, s1, s2 int) (float64, error) {
 	key := fmt.Sprintf("%d:%d", s1, s2)
 	if t, ok := cache[key]; ok {
 		return t, nil
@@ -173,7 +173,7 @@ func (o *routeOptimizer) getTravelTimeFromCache(cache map[string]float64, s1, s2
 	return 0, fmt.Errorf("%w: no travel time in DB between sight %d and %d", domain.ErrInvalidInput, s1, s2)
 }
 
-func (o *routeOptimizer) getTravelTime(ctx context.Context, s1, s2 int) (float64, error) {
+func (o *RouteOptimizer) getTravelTime(ctx context.Context, s1, s2 int) (float64, error) {
 	query := `SELECT EXTRACT(EPOCH FROM travel_time) FROM tour_guide.time_between_sights WHERE sight1_id = $1 AND sight2_id = $2`
 	var seconds float64
 	err := o.db.QueryRow(ctx, query, s1, s2).Scan(&seconds)
@@ -181,4 +181,18 @@ func (o *routeOptimizer) getTravelTime(ctx context.Context, s1, s2 int) (float64
 		return 0, fmt.Errorf("%w: no travel time in DB between sight %d and %d", domain.ErrInvalidInput, s1, s2)
 	}
 	return seconds, nil
+}
+
+func (o *RouteOptimizer) GetTravelTime(ctx context.Context, sight1ID, sight2ID int) (time.Duration, error) {
+	query := `
+	SELECT EXTRACT(EPOCH FROM travel_time) 
+	FROM tour_guide.time_between_sights 
+	WHERE sight1_id = $1 AND sight2_id = $2
+	`
+	var seconds float64
+	err := o.db.QueryRow(ctx, query, sight1ID, sight2ID).Scan(&seconds)
+	if err != nil {
+		return 0, fmt.Errorf("%w: no travel time between %d and %d", domain.ErrInvalidInput, sight1ID, sight2ID)
+	}
+	return time.Duration(seconds * float64(time.Second)), nil
 }

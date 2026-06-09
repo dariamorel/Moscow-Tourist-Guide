@@ -4,17 +4,18 @@ import (
 	"context"
 	"log"
 	"time"
+	"fmt"
 
 	"tour-guide/internal/domain"
 	"tour-guide/internal/domain/entity"
 	"tour-guide/internal/domain/repository"
+	"tour-guide/internal/domain/value_object"
+	domainservices "tour-guide/internal/domain/service"
 )
 
 type CreateRouteInput struct {
 	UserID       int
 	PlannedOrder []int
-	TotalTime    string
-	Date         time.Time
 }
 
 type UpdateRouteInput struct {
@@ -41,39 +42,37 @@ type RouteService struct {
 	routeRepo repository.RouteRepository
 	sightRepo repository.SightRepository
 	achievementSvc *AchievementService
+	optimizer domainservices.RouteOptimizer
 }
 
-func NewRouteService(rRepo repository.RouteRepository, sRepo repository.SightRepository, aSvc *AchievementService) *RouteService {
- 	return &RouteService{routeRepo: rRepo, sightRepo: sRepo, achievementSvc: aSvc}
+func NewRouteService(rRepo repository.RouteRepository, sRepo repository.SightRepository, aSvc *AchievementService, optimizer domainservices.RouteOptimizer) *RouteService {
+ 	return &RouteService{routeRepo: rRepo, sightRepo: sRepo, achievementSvc: aSvc, optimizer: optimizer}
 }
 
 func (s *RouteService) CreateRoute(ctx context.Context, in CreateRouteInput) (*entity.Route, error) {
-	if in.UserID <= 0 {
+	if in.UserID <= 0 || len(in.PlannedOrder) < 2 {
 		return nil, domain.ErrInvalidInput
 	}
-	if len(in.PlannedOrder) == 0 {
-		return nil, domain.ErrInvalidInput
-	}
-	if in.Date.IsZero() {
-		return nil, domain.ErrInvalidInput
+
+	var totalTime time.Duration
+	for i := 0; i < len(in.PlannedOrder)-1; i++ {
+		t, err := s.optimizer.GetTravelTime(ctx, in.PlannedOrder[i], in.PlannedOrder[i+1])
+		if err != nil {
+			return nil, fmt.Errorf("failed to calculate travel time: %w", err)
+		}
+		totalTime += t
 	}
 
 	route := &entity.Route{
 		UserID:       in.UserID,
 		PlannedOrder: in.PlannedOrder,
-		TotalTime:    in.TotalTime,
-		Date:         in.Date,
+		TotalTime:    valueobject.FormatDuration(totalTime),
+		Date:         time.Now(),
 		Status:       entity.StatusPlanned,
 	}
 
 	if err := route.Validate(); err != nil {
 		return nil, err
-	}
-
-	for _, sightID := range in.PlannedOrder {
-		if _, err := s.sightRepo.GetByID(ctx, sightID); err != nil {
-			return nil, domain.ErrInvalidInput
-		}
 	}
 
 	if err := s.routeRepo.Create(ctx, route); err != nil {

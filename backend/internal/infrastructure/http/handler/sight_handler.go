@@ -6,6 +6,8 @@ import (
 
 	"tour-guide/internal/application/service"
 	"tour-guide/internal/domain"
+	"tour-guide/internal/domain/value_object"
+	"tour-guide/internal/domain/entity"
 	"tour-guide/internal/infrastructure/http/mappers"
 	"tour-guide/internal/infrastructure/http/api"
 )
@@ -16,6 +18,40 @@ type SightHandler struct {
 
 func NewSightHandler(svc *service.SightService) *SightHandler {
  	return &SightHandler{service: svc}
+}
+
+func (h *SightHandler) CreateSight(w http.ResponseWriter, r *http.Request) {
+	var input api.Sight
+	if err := decodeJSON(r, &input); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	coords, err := valueobject.NewCoordinates(input.Lat, input.Lon)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid coordinates")
+		return
+	}
+
+	sight := &entity.Sight{
+		ID:          input.Id,
+		Img:         input.Img,
+		Coordinates: *coords,
+		Tags:        mappers.Val(input.Tags, []string{}),
+		ShortDesc:   input.ShortDesc,
+		Description: input.Desc,
+		Timetable:   mappers.Val(input.Timetable, ""),
+		Addr:        mappers.Val(input.Addr, ""),
+		Phone:       mappers.Val(input.Phone, ""),
+		Subway:      mappers.Val(input.Subway, ""),
+	}
+
+	if err := h.service.CreateSight(r.Context(), sight); err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to create sight")
+		return
+	}
+
+	respondJSON(w, http.StatusCreated, mappers.ToAPISight(sight))
 }
 
 func (h *SightHandler) GetSight(w http.ResponseWriter, r *http.Request, sightId int) {

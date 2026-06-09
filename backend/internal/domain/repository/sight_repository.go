@@ -13,6 +13,7 @@ type SightFilter struct {
 
 type SightRepository interface {
 	GetByID(ctx context.Context, id int) (*entity.Sight, error)
-
 	List(ctx context.Context, filter SightFilter) ([]*entity.Sight, error)
+	 Create(ctx context.Context, sight *entity.Sight) error
+ 	GetAllBasic(ctx context.Context) ([]struct{ ID int; Lat, Lon float64 }, error)
 }

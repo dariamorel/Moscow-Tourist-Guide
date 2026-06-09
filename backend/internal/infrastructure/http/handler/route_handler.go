@@ -25,23 +25,24 @@ func (h *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	route, err := mappers.RouteInputToDomain(input)
-	if err != nil {
-		respondError(w, http.StatusBadRequest, "Invalid route data")
-		return
+	ids := make([]int, len(input.PlannedOrder))
+	for i, id := range input.PlannedOrder {
+		ids[i] = id
 	}
 
 	created, err := h.service.CreateRoute(r.Context(), service.CreateRouteInput{
-		UserID:       route.UserID,
-		PlannedOrder: route.PlannedOrder,
-		TotalTime:    route.TotalTime,
-		Date:         route.Date,
+		UserID:       input.UserId,
+		PlannedOrder: ids,
 	})
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "Failed to create route")
+		if err == domain.ErrInvalidInput {
+			respondError(w, http.StatusBadRequest, "Invalid route data or missing travel times")
+			return
+		}
+		respondError(w, http.StatusInternalServerError, "Failed to create route")
 		return
 	}
-
+	
 	withSights, err := h.service.GetRouteWithSights(r.Context(), created.ID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to load route details")

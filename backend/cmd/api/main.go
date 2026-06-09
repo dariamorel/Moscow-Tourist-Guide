@@ -137,13 +137,13 @@ func main() {
 	routeRepo := postgres.NewRouteRepo(db)
 	userRepo := postgres.NewUserRepo(db)
 	achievementRepo := postgres.NewAchievementRepo(db)
-	routeOptimizaer := postgres.NewRouteOptimizer(db)
+	routeOptimizer := postgres.NewRouteOptimizer(db)
 
 	sightService := service.NewSightService(sightRepo)
 	authService := service.NewAuthService(userRepo)
 	achievementService := service.NewAchievementService(achievementRepo, sightRepo, routeRepo)
-	routeService := service.NewRouteService(routeRepo, sightRepo, achievementService)
-	routeOptimizationService := service.NewRouteOptimizationService(sightRepo, routeOptimizaer)
+	routeService := service.NewRouteService(routeRepo, sightRepo, achievementService, routeOptimizer)
+	routeOptimizationService := service.NewRouteOptimizationService(sightRepo, routeOptimizer)
 
 	sightHandler := handler.NewSightHandler(sightService)
 	routeHandler := handler.NewRouteHandler(routeService)

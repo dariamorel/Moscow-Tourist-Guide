@@ -22,6 +22,13 @@ func NewSightService(repo repository.SightRepository) *SightService {
  	return &SightService{repo: repo}
 }
 
+func (s *SightService) CreateSight(ctx context.Context, sight *entity.Sight) error {
+	if err := sight.Validate(); err != nil {
+		return err
+	}
+	return s.repo.Create(ctx, sight)
+}
+
 func (s *SightService) GetSight(ctx context.Context, id int) (*entity.Sight, error) {
 	if id <= 0 {
 		return nil, domain.ErrInvalidInput

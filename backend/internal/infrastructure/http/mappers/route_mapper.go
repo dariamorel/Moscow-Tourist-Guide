@@ -1,8 +1,6 @@
 package mappers
 
 import (
-	"time"
-
 	"tour-guide/internal/domain"
 	"tour-guide/internal/domain/entity"
 	"tour-guide/internal/application/service"
@@ -31,11 +29,12 @@ func ToAPIRoutesWithSights(routes []*service.RouteWithSights) []api.Route {
 	return res
 }
 
+/*
 func RouteInputToDomain(in api.RouteInput) (*entity.Route, error) {
 	route := &entity.Route{
 		UserID:       in.UserId,
 		PlannedOrder: in.PlannedOrder,
-		TotalTime:    Val(in.TotalTime, ""),
+		TotalTime:    "",
 		Date:         time.Now(),
 		Status:       entity.StatusPlanned,
 	}
@@ -52,7 +51,7 @@ func UpdateRouteInputToDomain(routeID int, in api.RouteInput, existing *entity.R
 		UserID:       existing.UserID,
 		Order:        existing.Order,
 		PlannedOrder: in.PlannedOrder,
-		TotalTime:    Val(in.TotalTime, existing.TotalTime),
+		TotalTime:    "",
 		Date:         existing.Date,
 		Status:       existing.Status,
 	}
@@ -62,6 +61,7 @@ func UpdateRouteInputToDomain(routeID int, in api.RouteInput, existing *entity.R
 	}
 	return route, nil
 }
+*/
 
 func RouteUpdateInputToDomain(routeID int, in api.RouteUpdateInput, existing *entity.Route) (*entity.Route, error) {
 	route := &entity.Route{
