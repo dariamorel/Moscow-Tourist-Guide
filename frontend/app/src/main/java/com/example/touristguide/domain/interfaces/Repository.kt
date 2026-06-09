@@ -73,4 +73,8 @@ interface Repository {
      * получить список всех категорий.
      */
     suspend fun getAllCategories(): List<String>
+
+    companion object {
+        const val REPOSITORY_TAG = "Sights Repository Tag"
+    }
 }
