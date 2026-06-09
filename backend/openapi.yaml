@@ -94,8 +94,6 @@ components:
             type: integer
           minItems: 1
           description: "Порядок обхода достопримечательностей"
-        total_time:
-          type: string
 
     RouteUpdateInput:
       type: object
