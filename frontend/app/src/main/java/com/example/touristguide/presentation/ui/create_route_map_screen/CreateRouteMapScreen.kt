@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateRouteMapScreen(
+    onRouteCreate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: CreateRouteMapViewModel = viewModel(
@@ -143,6 +144,13 @@ fun CreateRouteMapScreen(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+
+                CreateRouteButton(
+                    onClick = onRouteCreate,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 24.dp)
                 )
             }
         }

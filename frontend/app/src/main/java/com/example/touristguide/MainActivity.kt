@@ -51,7 +51,8 @@ fun MainScreen(
     NavHost(navController = navController, startDestination = Screens.CREATE_ROUTE_MAP.name) {
         composable(Screens.CREATE_ROUTE_MAP.name) {
             CreateRouteMapScreen(
-                modifier = modifier
+                modifier = modifier,
+                onRouteCreate = { }
             )
         }
     }
