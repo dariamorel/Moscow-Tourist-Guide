@@ -21,7 +21,6 @@ fun CreateRouteButton(
         modifier = modifier,
         shape = RoundedCornerShape(50),
         color = Color.Black,
-        border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
         shadowElevation = 2.dp
     ) {
         Text(

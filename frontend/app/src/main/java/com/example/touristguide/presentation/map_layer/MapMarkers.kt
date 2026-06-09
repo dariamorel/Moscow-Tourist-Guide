@@ -22,8 +22,8 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
 import kotlin.math.max
 
-private const val NORMAL_MARKER_SIZE_DP = 48
-private const val SELECTED_MARKER_SIZE_DP = 72
+private const val NORMAL_MARKER_SIZE_DP = 36
+private const val SELECTED_MARKER_SIZE_DP = 60
 
 @Composable
 fun MapMarkers(
@@ -63,7 +63,7 @@ fun MapMarkers(
             val markerSize = if (isSelected) SELECTED_MARKER_SIZE_DP else NORMAL_MARKER_SIZE_DP
             val markerDrawable = createMarkerDrawable(
                 context = ctx,
-                drawableResId = R.drawable.maps_icon,
+                drawableResId = R.drawable.ic_location_on,
                 sizeDp = markerSize,
                 label = if (isSelected) sight.title else null
             )
