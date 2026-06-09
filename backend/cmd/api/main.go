@@ -105,16 +105,12 @@ func (s *apiServerImpl) PostUsersLogin(w http.ResponseWriter, r *http.Request) {
  	s.authHandler.Login(w, r)
 }
 
-func (s *apiServerImpl) GetAchievements(w http.ResponseWriter, r *http.Request) {
- 	s.achievementHandler.GetAchievements(w, r)
+func (s *apiServerImpl) GetAchievements(w http.ResponseWriter, r *http.Request, params api.GetAchievementsParams) {
+ 	s.achievementHandler.GetAchievements(w, r, params)
 }
 
 func (s *apiServerImpl) GetAchievementsCompleted(w http.ResponseWriter, r *http.Request, params api.GetAchievementsCompletedParams) {
  	s.achievementHandler.GetAchievementsCompleted(w, r, params)
-}
-
-func (s *apiServerImpl) PutAchievements(w http.ResponseWriter, r *http.Request) {
- 	s.achievementHandler.UpdateAchievements(w, r)
 }
 
 func main() {
@@ -138,9 +134,9 @@ func main() {
 	achievementRepo := postgres.NewAchievementRepo(db)
 
 	sightService := service.NewSightService(sightRepo)
-	routeService := service.NewRouteService(routeRepo, sightRepo)
 	authService := service.NewAuthService(userRepo)
-	achievementService := service.NewAchievementService(achievementRepo)
+	achievementService := service.NewAchievementService(achievementRepo, sightRepo, routeRepo)
+	routeService := service.NewRouteService(routeRepo, sightRepo, achievementService)
 
 	sightHandler := handler.NewSightHandler(sightService)
 	routeHandler := handler.NewRouteHandler(routeService)

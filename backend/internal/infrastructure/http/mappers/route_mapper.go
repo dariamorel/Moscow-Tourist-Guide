@@ -5,26 +5,28 @@ import (
 
 	"tour-guide/internal/domain"
 	"tour-guide/internal/domain/entity"
+	"tour-guide/internal/application/service"
 	"tour-guide/internal/infrastructure/http/api"
 )
 
-func ToAPIRoute(r *entity.Route) api.Route {
+func ToAPIRouteWithSights(r *service.RouteWithSights) api.Route {
 	statusStr := string(r.Status)
+	sights := ToAPISights(r.PlannedSights)
 	return api.Route{
 		Id:           int(r.ID),
 		UserId:       int(r.UserID),
 		Date:         r.Date,
 		Order:        Ptr(r.Order),
-		PlannedOrder: Ptr(r.PlannedOrder),
+		PlannedOrder: Ptr(sights),
 		TotalTime:    EmptyStringToNil(r.TotalTime),
 		Status:       Ptr(api.RouteStatus(statusStr)),
 	}
 }
 
-func ToAPIRoutes(routes []*entity.Route) []api.Route {
+func ToAPIRoutesWithSights(routes []*service.RouteWithSights) []api.Route {
 	res := make([]api.Route, 0, len(routes))
 	for _, r := range routes {
-		res = append(res, ToAPIRoute(r))
+		res = append(res, ToAPIRouteWithSights(r))
 	}
 	return res
 }

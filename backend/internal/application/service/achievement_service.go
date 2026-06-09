@@ -8,22 +8,22 @@ import (
 	"tour-guide/internal/domain/repository"
 )
 
-type UpdateAchievementInput struct {
-	UserID        int
-	AchievementID int
-	Progress      int
-}
-
 type AchievementService struct {
- 	repo repository.AchievementRepository
+	repo      repository.AchievementRepository
+	sightRepo repository.SightRepository
+	routeRepo repository.RouteRepository
 }
 
-func NewAchievementService(repo repository.AchievementRepository) *AchievementService {
- 	return &AchievementService{repo: repo}
+func NewAchievementService(
+	repo repository.AchievementRepository,
+	sightRepo repository.SightRepository,
+	routeRepo repository.RouteRepository,
+) *AchievementService {
+ 	return &AchievementService{repo: repo, sightRepo: sightRepo, routeRepo: routeRepo}
 }
 
-func (s *AchievementService) ListAll(ctx context.Context) ([]*entity.Achievement, error) {
- 	return s.repo.ListAll(ctx)
+func (s *AchievementService) ListAll(ctx context.Context, userID int) ([]*entity.Achievement, error) {
+ 	return s.repo.ListAll(ctx, userID)
 }
 
 func (s *AchievementService) ListCompletedByUser(ctx context.Context, userID int) ([]*entity.Achievement, error) {
@@ -33,23 +33,85 @@ func (s *AchievementService) ListCompletedByUser(ctx context.Context, userID int
 	return s.repo.GetCompletedByUserID(ctx, userID)
 }
 
-func (s *AchievementService) UpdateProgress(ctx context.Context, in UpdateAchievementInput) error {
-	if in.UserID <= 0 || in.AchievementID <= 0 {
-		return domain.ErrInvalidInput
-	}
-	if in.Progress < 0 {
+func (s *AchievementService) CheckAndUpdate(ctx context.Context, userID int) error {
+	if userID <= 0 {
 		return domain.ErrInvalidInput
 	}
 
-	ua := &entity.UserAchievement{
-		UserID:        in.UserID,
-		AchievementID: in.AchievementID,
-		Progress:      in.Progress,
-	}
-
-	if err := ua.Validate(); err != nil {
+	stats, err := s.collectUserStats(ctx, userID)
+	if err != nil {
 		return err
 	}
 
-	return s.repo.SaveUserProgress(ctx, ua)
+	allAchievements, err := s.repo.ListAll(ctx, 0)
+	if err != nil {
+	return err
+	}
+
+	for _, ach := range allAchievements {
+		var progress int
+		switch ach.Type {
+		case entity.AchievementSightsVisited:
+			progress = stats.TotalUniqueSights
+		case entity.AchievementRoutesCompleted:
+			progress = stats.CompletedRoutes
+		case entity.AchievementTagCollector:
+			progress = stats.SightsByTag[ach.Tag]
+		default:
+			continue
+		}
+
+		ua := &entity.UserAchievement{
+			UserID:        userID,
+			AchievementID: ach.ID,
+			Progress:      progress,
+		}
+		if err := s.repo.UpdateProgress(ctx, ua); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type userStats struct {
+	TotalUniqueSights int
+	CompletedRoutes   int
+	SightsByTag       map[string]int
+}
+
+func (s *AchievementService) collectUserStats(ctx context.Context, userID int) (*userStats, error) {
+	stats := &userStats{
+		SightsByTag: make(map[string]int),
+	}
+
+	completedStatus := entity.StatusCompleted
+	routes, err := s.routeRepo.List(ctx, repository.RouteFilter{
+		UserID: userID,
+		Status: &completedStatus,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	stats.CompletedRoutes = len(routes)
+
+	uniqueSights := make(map[int]struct{})
+	for _, r := range routes {
+		for _, sightID := range r.Order {
+			uniqueSights[sightID] = struct{}{}
+		}
+	}
+	stats.TotalUniqueSights = len(uniqueSights)
+
+	for sightID := range uniqueSights {
+		sight, err := s.sightRepo.GetByID(ctx, sightID)
+		if err != nil || sight == nil {
+			continue
+		}
+		for _, tag := range sight.Tags {
+			stats.SightsByTag[tag]++
+		}
+	}
+
+	return stats, nil
 }

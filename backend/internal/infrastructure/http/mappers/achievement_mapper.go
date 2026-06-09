@@ -14,6 +14,7 @@ func ToAPIAchievement(a *entity.Achievement) api.Achievement {
 		IconUrl:       EmptyStringToNil(a.IconURL),
 		RequiredCount: Ptr(a.RequiredCount),
 		Tag:           EmptyStringToNil(a.Tag),
+		Progress:      Ptr(a.Progress),
 	}
 }
 
@@ -25,6 +26,7 @@ func ToAPIAchievements(list []*entity.Achievement) []api.Achievement {
 	return res
 }
 
+/*
 func UserAchievementInputToEntity(in api.UserAchievementInput) *entity.UserAchievement {
 	ua := &entity.UserAchievement{
 		UserID:        in.UserId,
@@ -35,3 +37,4 @@ func UserAchievementInputToEntity(in api.UserAchievementInput) *entity.UserAchie
 	}
 	return ua
 }
+*/

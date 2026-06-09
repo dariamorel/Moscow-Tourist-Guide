@@ -6,9 +6,11 @@ import (
 )
 
 type AchievementRepository interface {
-	ListAll(ctx context.Context) ([]*entity.Achievement, error)
+	ListAll(ctx context.Context, userID int) ([]*entity.Achievement, error)
 	
 	GetCompletedByUserID(ctx context.Context, userID int) ([]*entity.Achievement, error)
 	
-	SaveUserProgress(ctx context.Context, ua *entity.UserAchievement) error
+	UpdateProgress(ctx context.Context, ua *entity.UserAchievement) error
+
+	GetByIDs(ctx context.Context, ids []int) ([]*entity.Achievement, error)
 }

@@ -96,25 +96,21 @@ func (r *routeRepo) GetByID(ctx context.Context, id int) (*entity.Route, error) 
 	SELECT r.id, r.user_id, r.status, r.total_time::text, r.date, r.created_at, r.updated_at,
 		COALESCE(array_agg(CASE WHEN ri.status = 'visited' THEN ri.sight_id END) FILTER (WHERE ri.status = 'visited'), '{}')::bigint[],
 		COALESCE(array_agg(ri.sight_id ORDER BY ri.stop_order), '{}')::bigint[]
-	FROM routes r
-	LEFT JOIN route_items ri ON r.id = ri.route_id
+	FROM tour_guide.routes r
+	LEFT JOIN tour_guide.route_items ri ON r.id = ri.route_id
 	WHERE r.id = $1
 	GROUP BY r.id
 	`
 
 	var route entity.Route
-	var order []int
-	var planned []int
-
+	var order, planned []int
 	err := r.db.QueryRow(ctx, query, id).Scan(
 		&route.ID, &route.UserID, &route.Status, &route.TotalTime,
-		&route.Date, &route.CreatedAt, &route.UpdatedAt,
-		&order, &planned,
+		&route.Date, &route.CreatedAt, &route.UpdatedAt, &order, &planned,
 	)
 	if err != nil {
 		return nil, mapError(err)
 	}
-
 	route.Order = order
 	route.PlannedOrder = planned
 	return &route, nil

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"log"
 
 	"tour-guide/internal/application/service"
 	"tour-guide/internal/domain"
@@ -22,16 +21,12 @@ func NewRouteHandler(svc *service.RouteService) *RouteHandler {
 func (h *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 	var input api.RouteInput
 	if err := decodeJSON(r, &input); err != nil {
-		log.Printf("CreateRoute: JSON decode error: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
-	
-	log.Printf("CreateRoute: input.UserId=%d, len(PlannedOrder)=%d", input.UserId, len(input.PlannedOrder))
 
 	route, err := mappers.RouteInputToDomain(input)
 	if err != nil {
-		log.Printf("CreateRoute: mapper error: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid route data")
 		return
 	}
@@ -43,16 +38,16 @@ func (h *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		Date:         route.Date,
 	})
 	if err != nil {
-		log.Printf("CreateRoute: service error: %T - %v", err, err)
-		if err == domain.ErrInvalidInput {
-			respondError(w, http.StatusBadRequest, "Invalid route data")
-			return
-		}
-		respondError(w, http.StatusInternalServerError, "Failed to create route")
+		respondError(w, http.StatusBadRequest, "Failed to create route")
 		return
 	}
-	log.Printf("CreateRoute: success, route_id=%d", created.ID)
-	respondJSON(w, http.StatusCreated, mappers.ToAPIRoute(created))
+
+	withSights, err := h.service.GetRouteWithSights(r.Context(), created.ID)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to load route details")
+		return
+	}
+	respondJSON(w, http.StatusCreated, mappers.ToAPIRouteWithSights(withSights))
 }
 
 func (h *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request, routeId int) {
@@ -85,16 +80,18 @@ func (h *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request, route
 		Status:       &domainRoute.Status,
 	}
 
-	updated, err := h.service.UpdateRoute(r.Context(), domainRoute.ID, updateData)
+	_, err = h.service.UpdateRoute(r.Context(), domainRoute.ID, updateData)
 	if err != nil {
-		if err == domain.ErrNotFound {
-			respondError(w, http.StatusNotFound, "Route not found")
-			return
-		}
 		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	respondJSON(w, http.StatusOK, mappers.ToAPIRoute(updated))
+
+	withSights, err := h.service.GetRouteWithSights(r.Context(), domainRoute.ID)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to load updated route")
+		return
+	}
+	respondJSON(w, http.StatusOK, mappers.ToAPIRouteWithSights(withSights))
 }
 
 func (h *RouteHandler) DeleteRoute(w http.ResponseWriter, r *http.Request, routeId int) {
@@ -112,15 +109,11 @@ func (h *RouteHandler) DeleteRoute(w http.ResponseWriter, r *http.Request, route
 func (h *RouteHandler) GetRoutes(w http.ResponseWriter, r *http.Request, params api.GetRoutesParams) {
 	var status *entity.RouteStatus
 	if params.Status != nil {
-		s, err := mappers.ParseRouteStatusFromParams(params.Status)
-		if err != nil {
-			respondError(w, http.StatusBadRequest, "Invalid status filter")
-			return
-		}
+		s := entity.RouteStatus(*params.Status)
 		status = &s
 	}
 
-	routes, err := h.service.ListRoutes(r.Context(), service.ListRoutesInput{
+	routes, err := h.service.ListRoutesWithSights(r.Context(), service.ListRoutesInput{
 		UserID: params.UserId,
 		Status: status,
 	})
@@ -128,44 +121,41 @@ func (h *RouteHandler) GetRoutes(w http.ResponseWriter, r *http.Request, params 
 		respondError(w, http.StatusInternalServerError, "Failed to list routes")
 		return
 	}
-	respondJSON(w, http.StatusOK, mappers.ToAPIRoutes(routes))
+	respondJSON(w, http.StatusOK, mappers.ToAPIRoutesWithSights(routes))
 }
 
 func (h *RouteHandler) GetRoutesPassed(w http.ResponseWriter, r *http.Request, params api.GetRoutesPassedParams) {
-	completed := entity.StatusCompleted
-	routes, err := h.service.ListRoutes(r.Context(), service.ListRoutesInput{
-		UserID: params.UserId,
-		Status: &completed,
-	})
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to list passed routes")
-		return
-	}
-	respondJSON(w, http.StatusOK, mappers.ToAPIRoutes(routes))
+	completed := api.Completed
+	h.GetRoutes(
+		w,
+		r,
+		api.GetRoutesParams{
+			UserId: params.UserId,
+			Status: &completed,
+		},
+	)
 }
 
 func (h *RouteHandler) GetRoutesDeclined(w http.ResponseWriter, r *http.Request, params api.GetRoutesDeclinedParams) {
-	declined := entity.StatusDeclined
-	routes, err := h.service.ListRoutes(r.Context(), service.ListRoutesInput{
-		UserID: params.UserId,
-		Status: &declined,
-	})
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to list declined routes")
-		return
-	}
-	respondJSON(w, http.StatusOK, mappers.ToAPIRoutes(routes))
+	declined := api.Declined
+	h.GetRoutes(
+		w,
+		r,
+		api.GetRoutesParams{
+			UserId: params.UserId,
+			Status: &declined,
+		},
+	)
 }
 
 func (h *RouteHandler) GetRoutesInProgress(w http.ResponseWriter, r *http.Request, params api.GetRoutesInProgressParams) {
-	inProgress := entity.StatusInProgress
-	routes, err := h.service.ListRoutes(r.Context(), service.ListRoutesInput{
-		UserID: params.UserId,
-		Status: &inProgress,
-	})
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to list in-progress routes")
-		return
-	}
-	respondJSON(w, http.StatusOK, mappers.ToAPIRoutes(routes))
+	inProgress := api.InProgress
+	h.GetRoutes(
+		w,
+		r,
+		api.GetRoutesParams{
+			UserId: params.UserId,
+			Status: &inProgress,
+		},
+	)
 }

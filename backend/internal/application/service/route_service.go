@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"tour-guide/internal/domain"
@@ -39,10 +40,11 @@ type ListRoutesInput struct {
 type RouteService struct {
 	routeRepo repository.RouteRepository
 	sightRepo repository.SightRepository
+	achievementSvc *AchievementService
 }
 
-func NewRouteService(rRepo repository.RouteRepository, sRepo repository.SightRepository) *RouteService {
- 	return &RouteService{routeRepo: rRepo, sightRepo: sRepo}
+func NewRouteService(rRepo repository.RouteRepository, sRepo repository.SightRepository, aSvc *AchievementService) *RouteService {
+ 	return &RouteService{routeRepo: rRepo, sightRepo: sRepo, achievementSvc: aSvc}
 }
 
 func (s *RouteService) CreateRoute(ctx context.Context, in CreateRouteInput) (*entity.Route, error) {
@@ -101,6 +103,8 @@ func (s *RouteService) UpdateRoute(ctx context.Context, routeID int, data Update
 		return nil, domain.ErrNotFound
 	}
 
+	oldStatus := route.Status
+
 	if data.Order != nil {
 		route.Order = *data.Order
 	}
@@ -121,6 +125,13 @@ func (s *RouteService) UpdateRoute(ctx context.Context, routeID int, data Update
 	if err := s.routeRepo.Update(ctx, route); err != nil {
 		return nil, err
 	}
+
+	if route.Status == entity.StatusCompleted && oldStatus != entity.StatusCompleted {
+		if err := s.achievementSvc.CheckAndUpdate(ctx, route.UserID); err != nil {
+			log.Printf("Error while updating achievements: %s", err.Error())
+		}
+	}
+
 	return route, nil
 }
 
@@ -147,4 +158,94 @@ func (s *RouteService) DeleteRoute(ctx context.Context, routeID int) error {
 		return domain.ErrNotFound
 	}
 	return s.routeRepo.Delete(ctx, routeID)
+}
+
+type RouteWithSights struct {
+	*entity.Route
+	PlannedSights []*entity.Sight
+}
+
+func (s *RouteService) GetRouteWithSights(ctx context.Context, routeID int) (*RouteWithSights, error) {
+	route, err := s.routeRepo.GetByID(ctx, routeID)
+	if err != nil {
+		return nil, err
+	}
+	if route == nil {
+		return nil, domain.ErrNotFound
+	}
+
+	sights, err := s.loadSightsByIDs(ctx, route.PlannedOrder)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RouteWithSights{Route: route, PlannedSights: sights}, nil
+}
+
+func (s *RouteService) ListRoutesWithSights(ctx context.Context, in ListRoutesInput) ([]*RouteWithSights, error) {
+	routes, err := s.routeRepo.List(ctx, repository.RouteFilter{
+		UserID: in.UserID,
+		Status: in.Status,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	allIDs := make(map[int]struct{})
+	for _, r := range routes {
+		for _, id := range r.PlannedOrder {
+			allIDs[id] = struct{}{}
+		}
+	}
+
+	idList := make([]int, 0, len(allIDs))
+	for id := range allIDs {
+		idList = append(idList, id)
+	}
+	sightsByID, err := s.loadSightsMap(ctx, idList)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*RouteWithSights, 0, len(routes))
+	for _, r := range routes {
+		sights := make([]*entity.Sight, 0, len(r.PlannedOrder))
+		for _, id := range r.PlannedOrder {
+			if s, ok := sightsByID[id]; ok {
+				sights = append(sights, s)
+			}
+		}
+		result = append(result, &RouteWithSights{Route: r, PlannedSights: sights})
+	}
+	return result, nil
+}
+
+func (s *RouteService) loadSightsByIDs(ctx context.Context, ids []int) ([]*entity.Sight, error) {
+	sightsMap, err := s.loadSightsMap(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*entity.Sight, 0, len(ids))
+	for _, id := range ids {
+		if s, ok := sightsMap[id]; ok {
+			result = append(result, s)
+		}
+	}
+	return result, nil
+}
+
+func (s *RouteService) loadSightsMap(ctx context.Context, ids []int) (map[int]*entity.Sight, error) {
+	result := make(map[int]*entity.Sight)
+	for _, id := range ids {
+		if _, exists := result[id]; exists {
+			continue
+		}
+		sight, err := s.sightRepo.GetByID(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		if sight != nil {
+			result[id] = sight
+		}
+	}
+	return result, nil
 }
