@@ -111,9 +111,6 @@ components:
           items:
             type: integer
           example: [1, 2, 3, 4, 5]
-        total_time:
-          type: string
-          example: "2h 30m"
         status:
           type: string
           enum: [planned, in_progress, completed, declined]

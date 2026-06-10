@@ -80,9 +80,6 @@ func RouteUpdateInputToDomain(routeID int, in api.RouteUpdateInput, existing *en
 	if in.PlannedOrder != nil {
 		route.PlannedOrder = *in.PlannedOrder
 	}
-	if in.TotalTime != nil {
-		route.TotalTime = *in.TotalTime
-	}
 	if in.Status != nil {
 		route.Status = entity.RouteStatus(*in.Status)
 	}

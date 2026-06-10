@@ -110,11 +110,28 @@ func (s *RouteService) UpdateRoute(ctx context.Context, routeID int, data Update
 	if data.PlannedOrder != nil {
 		route.PlannedOrder = *data.PlannedOrder
 	}
-	if data.TotalTime != nil {
-		route.TotalTime = *data.TotalTime
-	}
+	
 	if data.Status != nil {
 		route.Status = *data.Status
+	}
+
+	var orderToCalc []int
+	if data.Order != nil {
+		orderToCalc = *data.Order
+	} else if data.PlannedOrder != nil {
+		orderToCalc = *data.PlannedOrder
+	}
+
+	if len(orderToCalc) > 1 {
+		var totalTime time.Duration
+		for i := 0; i < len(orderToCalc)-1; i++ {
+			t, err := s.optimizer.GetTravelTime(ctx, orderToCalc[i], orderToCalc[i+1])
+			if err != nil {
+				return nil, fmt.Errorf("failed to calculate travel time between sights %d and %d: %w", orderToCalc[i], orderToCalc[i+1], err)
+			}
+			totalTime += t
+		}
+		route.TotalTime = valueobject.FormatDuration(totalTime)
 	}
 
 	if err := route.Validate(); err != nil {
@@ -262,4 +279,16 @@ func (s *RouteService) loadSightsMap(ctx context.Context, ids []int) (map[int]*e
 		}
 	}
 	return result, nil
+}
+
+func slicesEqual(a, b []int64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }

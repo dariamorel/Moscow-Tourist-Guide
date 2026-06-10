@@ -173,6 +173,126 @@ func main() {
 		_ = db.QueryRow(ctx, "SELECT COUNT(*) FROM tour_guide.time_between_sights").Scan(&edgeCount)
 		log.Printf("Generated %d travel time edges", edgeCount)
 	}
+
+	log.Println("Seeding achievements...")
+	
+	sightsAchievements := []struct {
+		Name         string
+		Description  string
+		Required     int
+		IconURL      string
+	}{
+		{
+			Name:        "Первые шаги",
+			Description: "Посетите 5 достопримечательностей",
+			Required:    5,
+			IconURL:     "https://example.com/icons/step.png",
+		},
+		{
+			Name:        "Любопытный",
+			Description: "Посетите 10 достопримечательностей",
+			Required:    10,
+			IconURL:     "https://example.com/icons/curious.png",
+		},
+		{
+			Name:        "Путешественник",
+			Description: "Посетите 20 достопримечательностей",
+			Required:    20,
+			IconURL:     "https://example.com/icons/traveler.png",
+		},
+		{
+			Name:        "Исследователь",
+			Description: "Посетите 30 достопримечательностей",
+			Required:    30,
+			IconURL:     "https://example.com/icons/explorer.png",
+		},
+		{
+			Name:        "Знаток Москвы",
+			Description: "Посетите 50 достопримечательностей",
+			Required:    50,
+			IconURL:     "https://example.com/icons/expert.png",
+		},
+		{
+			Name:        "Легенда",
+			Description: "Посетите 100 достопримечательностей",
+			Required:    100,
+			IconURL:     "https://example.com/icons/legend.png",
+		},
+	}
+
+	for _, ach := range sightsAchievements {
+		_, err := db.Exec(ctx, `
+		INSERT INTO tour_guide.achievements (type, name, description, icon_url, required_count, tag)
+		VALUES ('sights_visited', $1, $2, $3, $4, NULL)
+		ON CONFLICT DO NOTHING
+		`, ach.Name, ach.Description, ach.IconURL, ach.Required)
+		if err != nil {
+			log.Printf("Failed to insert achievement %q: %v", ach.Name, err)
+		}
+	}
+	log.Printf("Inserted %d 'sights_visited' achievements", len(sightsAchievements))
+
+	tagAchievements := []struct {
+		Tag          string
+		Name         string
+		Description  string
+		Required     int
+		IconURL      string
+	}{
+		{
+			Tag:         "museums",
+			Name:        "Ценитель искусства",
+			Description: "Посетите 5 музеев",
+			Required:    5,
+			IconURL:     "https://example.com/icons/museum.png",
+		},
+		{
+			Tag:         "restaurants",
+			Name:        "Гурман",
+			Description: "Посетите 5 ресторанов",
+			Required:    5,
+			IconURL:     "https://example.com/icons/restaurant.png",
+		},
+		{
+			Tag:         "parks",
+			Name:        "Натуралист",
+			Description: "Посетите 5 парков",
+			Required:    5,
+			IconURL:     "https://example.com/icons/park.png",
+		},
+		{
+			Tag:         "theatre",
+			Name:        "Театрал",
+			Description: "Посетите 5 театров",
+			Required:    5,
+			IconURL:     "https://example.com/icons/theatre.png",
+		},
+		{
+			Tag:         "monastery",
+			Name:        "Паломник",
+			Description: "Посетите 5 монастырей",
+			Required:    5,
+			IconURL:     "https://example.com/icons/monastery.png",
+		},
+	}
+
+	for _, ach := range tagAchievements {
+		_, err := db.Exec(ctx, `
+		INSERT INTO tour_guide.achievements (type, name, description, icon_url, required_count, tag)
+		VALUES ('tag_collector', $1, $2, $3, $4, $5)
+		ON CONFLICT DO NOTHING
+		`, ach.Name, ach.Description, ach.IconURL, ach.Required, ach.Tag)
+		if err != nil {
+			log.Printf("Failed to insert tag achievement %q: %v", ach.Name, err)
+		}
+	}
+	log.Printf("Inserted %d 'tag_collector' achievements", len(tagAchievements))
+
+	var achCount int
+	_ = db.QueryRow(ctx, "SELECT COUNT(*) FROM tour_guide.achievements").Scan(&achCount)
+	log.Printf("Total achievements in DB: %d", achCount)
+
+	log.Println("\nDatabase seeding complete!")
 }
 
 func trim(s string, maxLen int) string {

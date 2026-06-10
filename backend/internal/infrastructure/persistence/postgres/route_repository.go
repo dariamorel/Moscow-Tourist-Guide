@@ -34,7 +34,7 @@ func (r *routeRepo) Create(ctx context.Context, route *entity.Route) error {
 	}
 
 	q1 := `
-	INSERT INTO routes (user_id, status, total_time, date, created_at, updated_at)
+	INSERT INTO tour_guide.routes (user_id, status, total_time, date, created_at, updated_at)
 	VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING id
 	`
 	err = tx.QueryRow(ctx, q1, route.UserID, route.Status, duration.String(), route.Date).Scan(&route.ID)
@@ -45,7 +45,7 @@ func (r *routeRepo) Create(ctx context.Context, route *entity.Route) error {
 	for i, sightID := range route.PlannedOrder {
 		status := "planned"
 		q2 := `
-		INSERT INTO route_items (route_id, sight_id, stop_order, status)
+		INSERT INTO tour_guide.route_items (route_id, sight_id, stop_order, status)
 		VALUES ($1, $2, $3, $4)
 		`
 		if _, err := tx.Exec(ctx, q2, route.ID, sightID, i+1, status); err != nil {
@@ -69,7 +69,7 @@ func (r *routeRepo) Update(ctx context.Context, route *entity.Route) error {
 	}
 
 	q1 := `
-	UPDATE routes 
+	UPDATE tour_guide.routes 
 	SET status = $2, total_time = $3, date = $4, updated_at = NOW()
 	WHERE id = $1
 	`
@@ -82,7 +82,7 @@ func (r *routeRepo) Update(ctx context.Context, route *entity.Route) error {
 	}
 
 	if len(route.PlannedOrder) > 0 || len(route.Order) > 0 {
-		_, _ = tx.Exec(ctx, `DELETE FROM route_items WHERE route_id = $1`, route.ID)
+		_, _ = tx.Exec(ctx, `DELETE FROM tour_guide.route_items WHERE route_id = $1`, route.ID)
 
 		visitedSet := make(map[int]bool)
 		for _, id := range route.Order {
@@ -94,7 +94,7 @@ func (r *routeRepo) Update(ctx context.Context, route *entity.Route) error {
 			if visitedSet[sightID] {
 				status = "visited"
 			}
-			q2 := `INSERT INTO route_items (route_id, sight_id, stop_order, status) VALUES ($1, $2, $3, $4)`
+			q2 := `INSERT INTO tour_guide.route_items (route_id, sight_id, stop_order, status) VALUES ($1, $2, $3, $4)`
 			if _, err := tx.Exec(ctx, q2, route.ID, sightID, i+1, status); err != nil {
 				return mapError(err)
 			}
@@ -173,8 +173,8 @@ func (r *routeRepo) Delete(ctx context.Context, id int) error {
 	}
 	defer tx.Rollback(ctx)
 
-	_, _ = tx.Exec(ctx, `DELETE FROM route_items WHERE route_id = $1`, id)
-	res, err := tx.Exec(ctx, `DELETE FROM routes WHERE id = $1`, id)
+	_, _ = tx.Exec(ctx, `DELETE FROM tour_guide.route_items WHERE route_id = $1`, id)
+	res, err := tx.Exec(ctx, `DELETE FROM tour_guide.routes WHERE id = $1`, id)
 	if err != nil {
 		return mapError(err)
 	}

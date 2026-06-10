@@ -58,7 +58,6 @@ func TestRouteEndpoints(t *testing.T) {
 
 		input := api.RouteUpdateInput{
 			Order:     ptr([]int{1, 2}),
-			TotalTime: ptr("2h 15m"),
 			Status:    ptr(api.RouteUpdateInputStatusInProgress),
 		}
 		reqBody, _ := json.Marshal(input)
@@ -77,7 +76,6 @@ func TestRouteEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, []int{1, 2}, *updated.Order)
-		assert.Equal(t, "2h 15m", *updated.TotalTime)
 		assert.Equal(t, api.RouteStatusInProgress, *updated.Status)
 	})
 
