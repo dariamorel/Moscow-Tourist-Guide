@@ -98,11 +98,15 @@ fun MainScreen(
 
         composable(Screens.MY_ROUTES.name) {
             MyRoutesScreen(
-                modifier = modifier
-            ) { route ->
-                navController.currentBackStackEntry?.savedStateHandle?.set("route", route)
-                navController.navigate(Screens.ROUTE.name)
-            }
+                modifier = modifier,
+                onCreateRouteClick = {
+                    navController.navigate(Screens.CREATE_ROUTE_MAP.name)
+                },
+                onRouteClick = { route ->
+                    navController.currentBackStackEntry?.savedStateHandle?.set("route", route)
+                    navController.navigate(Screens.ROUTE.name)
+                }
+            )
         }
 
         composable(Screens.ROUTE.name) {
