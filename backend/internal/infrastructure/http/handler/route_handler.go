@@ -25,6 +25,11 @@ func (h *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	name := ""
+	if input.Name != nil {
+		name = *input.Name
+	}
+
 	ids := make([]int, len(input.PlannedOrder))
 	for i, id := range input.PlannedOrder {
 		ids[i] = id
@@ -32,6 +37,7 @@ func (h *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 
 	created, err := h.service.CreateRoute(r.Context(), service.CreateRouteInput{
 		UserID:       input.UserId,
+		Name: 		  name,
 		PlannedOrder: ids,
 	})
 	if err != nil {
@@ -75,6 +81,7 @@ func (h *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request, route
 	}
 
 	updateData := service.UpdateRouteData{
+		Name:		  &domainRoute.Name,
 		Order:        &domainRoute.Order,
 		PlannedOrder: &domainRoute.PlannedOrder,
 		TotalTime:    &domainRoute.TotalTime,

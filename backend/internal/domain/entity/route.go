@@ -18,6 +18,7 @@ const (
 type Route struct {
 	ID           int
 	UserID       int
+	Name		 string
 	Order        []int
 	PlannedOrder []int
 	TotalTime    string
@@ -27,7 +28,6 @@ type Route struct {
 	UpdatedAt    time.Time
 }
 
-// Validate проверяет инварианты маршрута
 func (r *Route) Validate() error {
 	if r.UserID <= 0 {
 		return fmt.Errorf("%w: user id must be positive", domain.ErrInvalidInput)

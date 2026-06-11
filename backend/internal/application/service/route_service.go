@@ -15,10 +15,12 @@ import (
 
 type CreateRouteInput struct {
 	UserID       int
+	Name         string
 	PlannedOrder []int
 }
 
 type UpdateRouteInput struct {
+	Name         string
 	Order        []int
 	PlannedOrder []int
 	TotalTime    string
@@ -27,6 +29,7 @@ type UpdateRouteInput struct {
 }
 
 type UpdateRouteData struct {
+	Name         *string
 	Order        *[]int
 	PlannedOrder *[]int
 	TotalTime    *string
@@ -63,8 +66,14 @@ func (s *RouteService) CreateRoute(ctx context.Context, in CreateRouteInput) (*e
 		totalTime += t
 	}
 
+	name := in.Name
+	if name == "" {
+		name = "No name"
+	}
+
 	route := &entity.Route{
 		UserID:       in.UserID,
+		Name:		  name,
 		PlannedOrder: in.PlannedOrder,
 		TotalTime:    valueobject.FormatDuration(totalTime),
 		Date:         time.Now(),
@@ -100,6 +109,10 @@ func (s *RouteService) UpdateRoute(ctx context.Context, routeID int, data Update
 	}
 	if route == nil {
 		return nil, domain.ErrNotFound
+	}
+
+	if data.Name != nil {
+		route.Name = *data.Name
 	}
 
 	oldStatus := route.Status

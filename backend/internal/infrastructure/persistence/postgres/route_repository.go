@@ -34,10 +34,10 @@ func (r *routeRepo) Create(ctx context.Context, route *entity.Route) error {
 	}
 
 	q1 := `
-	INSERT INTO tour_guide.routes (user_id, status, total_time, date, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING id
+	INSERT INTO tour_guide.routes (user_id, name, status, total_time, date, created_at, updated_at)
+	VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) RETURNING id
 	`
-	err = tx.QueryRow(ctx, q1, route.UserID, route.Status, duration.String(), route.Date).Scan(&route.ID)
+	err = tx.QueryRow(ctx, q1, route.UserID, route.Name, route.Status, duration.String(), route.Date).Scan(&route.ID)
 	if err != nil {
 		return mapError(err)
 	}
@@ -70,10 +70,10 @@ func (r *routeRepo) Update(ctx context.Context, route *entity.Route) error {
 
 	q1 := `
 	UPDATE tour_guide.routes 
-	SET status = $2, total_time = $3, date = $4, updated_at = NOW()
+	SET name = $2, status = $3, total_time = $4, date = $5, updated_at = NOW()
 	WHERE id = $1
 	`
-	res, err := tx.Exec(ctx, q1, route.ID, route.Status, duration.String(), route.Date)
+	res, err := tx.Exec(ctx, q1, route.ID, route.Name, route.Status, duration.String(), route.Date)
 	if err != nil {
 		return mapError(err)
 	}
@@ -106,7 +106,7 @@ func (r *routeRepo) Update(ctx context.Context, route *entity.Route) error {
 
 func (r *routeRepo) GetByID(ctx context.Context, id int) (*entity.Route, error) {
 	query := `
-	SELECT r.id, r.user_id, r.status, EXTRACT(EPOCH FROM r.total_time), r.date, r.created_at, r.updated_at,
+	SELECT r.id, r.user_id, r.name, r.status, EXTRACT(EPOCH FROM r.total_time), r.date, r.created_at, r.updated_at,
 		COALESCE(array_agg(CASE WHEN ri.status = 'visited' THEN ri.sight_id END) FILTER (WHERE ri.status = 'visited'), '{}')::bigint[],
 		COALESCE(array_agg(ri.sight_id ORDER BY ri.stop_order), '{}')::bigint[]
 	FROM tour_guide.routes r
@@ -120,7 +120,7 @@ func (r *routeRepo) GetByID(ctx context.Context, id int) (*entity.Route, error) 
 	var totalSeconds float64
 
 	err := r.db.QueryRow(ctx, query, id).Scan(
-		&route.ID, &route.UserID, &route.Status, &totalSeconds,
+		&route.ID, &route.UserID, &route.Name, &route.Status, &totalSeconds,
 		&route.Date, &route.CreatedAt, &route.UpdatedAt, &order, &planned,
 	)
 	if err != nil {
@@ -134,7 +134,7 @@ func (r *routeRepo) GetByID(ctx context.Context, id int) (*entity.Route, error) 
 
 func (r *routeRepo) List(ctx context.Context, filter repository.RouteFilter) ([]*entity.Route, error) {
 	query := `
-	SELECT r.id, r.user_id, r.status, EXTRACT(EPOCH FROM r.total_time), r.date, r.created_at, r.updated_at,
+	SELECT r.id, r.user_id, r.name, r.status, EXTRACT(EPOCH FROM r.total_time), r.date, r.created_at, r.updated_at,
 		COALESCE(array_agg(CASE WHEN ri.status = 'visited' THEN ri.sight_id END) FILTER (WHERE ri.status = 'visited'), '{}')::bigint[],
 		COALESCE(array_agg(ri.sight_id ORDER BY ri.stop_order), '{}')::bigint[]
 	FROM tour_guide.routes r
@@ -155,7 +155,7 @@ func (r *routeRepo) List(ctx context.Context, filter repository.RouteFilter) ([]
 		var r entity.Route
 		var order, planned []int
 		var totalSeconds float64
-		if err := rows.Scan(&r.ID, &r.UserID, &r.Status, &totalSeconds, &r.Date, &r.CreatedAt, &r.UpdatedAt, &order, &planned); err != nil {
+		if err := rows.Scan(&r.ID, &r.UserID, &r.Name, &r.Status, &totalSeconds, &r.Date, &r.CreatedAt, &r.UpdatedAt, &order, &planned); err != nil {
 			return nil, err
 		}
 		r.Order = order

@@ -13,6 +13,7 @@ func ToAPIRouteWithSights(r *service.RouteWithSights) api.Route {
 	return api.Route{
 		Id:           int(r.ID),
 		UserId:       int(r.UserID),
+		Name: 		  Ptr(r.Name),
 		Date:         r.Date,
 		Order:        Ptr(r.Order),
 		PlannedOrder: Ptr(sights),
@@ -67,6 +68,7 @@ func RouteUpdateInputToDomain(routeID int, in api.RouteUpdateInput, existing *en
 	route := &entity.Route{
 		ID:           routeID,
 		UserID:       existing.UserID,
+		Name: 		  existing.Name,
 		Order:        existing.Order,
 		PlannedOrder: existing.PlannedOrder,
 		TotalTime:    existing.TotalTime,
@@ -82,6 +84,9 @@ func RouteUpdateInputToDomain(routeID int, in api.RouteUpdateInput, existing *en
 	}
 	if in.Status != nil {
 		route.Status = entity.RouteStatus(*in.Status)
+	}
+	if in.Name != nil {
+		route.Name = *in.Name
 	}
 
 	if err := route.Validate(); err != nil {

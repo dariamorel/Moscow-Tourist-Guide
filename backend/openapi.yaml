@@ -59,6 +59,10 @@ components:
           type: integer
         user_id:
           type: integer
+        name:
+          type: string
+          description: "Название маршрута"
+          example: "Прогулка по Красной площади"
         order:
           type: array
           description: "Пройденные достопримечательности (по порядку)"
@@ -88,6 +92,10 @@ components:
       properties:
         user_id:
           type: integer
+        name:
+          type: string
+          description: "Название маршрута"
+          example: "Прогулка по Красной площади"
         planned_order:
           type: array
           items:
@@ -99,6 +107,10 @@ components:
       type: object
       description: "Данные для обновления маршрута"
       properties:
+        name:
+          type: string
+          description: "Название маршрута"
+          example: "Прогулка по Красной площади"
         order:
           type: array
           description: "Пройденные достопримечательности (по порядку)"

@@ -1,0 +1,2 @@
+ALTER TABLE tour_guide.routes
+ADD COLUMN name VARCHAR(200) NOT NULL DEFAULT 'No name';

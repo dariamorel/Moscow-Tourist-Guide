@@ -125,6 +125,7 @@ curl -s \
   -H "Content-Type: application/json" \
   -d "{
     \"user_id\": $USER_ID,
+    \"name\": \"Route1\",
     \"planned_order\": [$S1,$S2,$S3,$S4,$S5]
   }"
 )
@@ -165,6 +166,7 @@ curl -s \
   -H "$AUTH_HEADER" \
   -H "Content-Type: application/json" \
   -d "{
+    \"name\": \"Route1\",
     \"order\": [$S1],
     \"status\": \"in_progress\"
   }" | jq .
@@ -210,6 +212,7 @@ curl -s \
   -H "$AUTH_HEADER" \
   -H "Content-Type: application/json" \
   -d "{
+    \"name\": \"Route1\",
     \"order\": [$S1,$S2,$S3,$S4,$S5],
     \"status\": \"completed\",
     \"total_time\": \"2h 15m\"
@@ -306,6 +309,7 @@ curl -s \
   -H "$AUTH_HEADER" \
   -H "Content-Type: application/json" \
   -d "{
+    \"name\": \"Route2\",
     \"user_id\": $USER_ID,
     \"planned_order\": [$S1,$S2,$S3,$S4,$S5]
   }"
