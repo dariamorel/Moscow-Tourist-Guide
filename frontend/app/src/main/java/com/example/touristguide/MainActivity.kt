@@ -19,9 +19,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.touristguide.domain.entities.OptimizedSightsOrder
+import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteMapScreen
 import com.example.touristguide.presentation.ui.create_route_screen.CreateRouteScreen
+import com.example.touristguide.presentation.ui.my_routes_screen.MyRoutesScreen
 import com.example.touristguide.presentation.ui.optimizing_loading_screen.OptimizingLoadingScreen
+import com.example.touristguide.presentation.ui.route_screen.RouteScreen
 import com.example.touristguide.ui.theme.TouristGuideTheme
 
 class MainActivity : ComponentActivity() {
@@ -44,7 +47,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class Screens {
-    CREATE_ROUTE_MAP, OPTIMIZING_LOADING, CREATE_ROUTE
+    CREATE_ROUTE_MAP, OPTIMIZING_LOADING, CREATE_ROUTE, MY_ROUTES, ROUTE
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -88,7 +91,30 @@ fun MainScreen(
             CreateRouteScreen(
                 optimizedSightsOrder = optimizedOrder,
                 modifier = modifier
-            )
+            ) {
+                navController.navigate(Screens.MY_ROUTES.name)
+            }
+        }
+
+        composable(Screens.MY_ROUTES.name) {
+            MyRoutesScreen(
+                modifier = modifier
+            ) { route ->
+                navController.currentBackStackEntry?.savedStateHandle?.set("route", route)
+                navController.navigate(Screens.ROUTE.name)
+            }
+        }
+
+        composable(Screens.ROUTE.name) {
+            val route = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Route>("route")
+            route?.let {
+                RouteScreen(
+                    route = route,
+                    modifier = modifier
+                )
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.interfaces.Repository
 import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteMapViewModel
 import com.example.touristguide.presentation.ui.create_route_screen.CreateRouteViewModel
+import com.example.touristguide.presentation.ui.my_routes_screen.MyRoutesViewModel
 import com.example.touristguide.presentation.ui.optimizing_loading_screen.OptimizingLoadingViewModel
 
 class PresentationComponent(
@@ -38,6 +39,16 @@ class PresentationComponent(
             initializer {
                 OptimizingLoadingViewModel(
                     sightIds = sightIds,
+                    repository = dependencies.getRepository()
+                )
+            }
+        }
+    }
+
+    fun createMyRoutesViewModel(): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                MyRoutesViewModel(
                     repository = dependencies.getRepository()
                 )
             }

@@ -39,6 +39,7 @@ import com.example.touristguide.presentation.di.PresentationComponentHolder
 fun CreateRouteScreen(
     optimizedSightsOrder: OptimizedSightsOrder,
     modifier: Modifier = Modifier,
+    onRouteCreate: () -> Unit
 ) {
     val viewModel: CreateRouteViewModel = viewModel(
         factory = PresentationComponentHolder.component.createCreateRouteViewModel(optimizedSightsOrder)
@@ -85,7 +86,10 @@ fun CreateRouteScreen(
         }
 
         Button(
-            onClick = viewModel::createRoute,
+            onClick = {
+                viewModel.createRoute(routeName)
+                onRouteCreate()
+                      },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),

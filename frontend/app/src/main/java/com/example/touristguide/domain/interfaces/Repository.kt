@@ -7,7 +7,6 @@ import com.example.touristguide.domain.entities.Sight
 import kotlinx.coroutines.flow.StateFlow
 
 interface Repository {
-    val allRoutes: StateFlow<List<Route>>
 
     /**
      * Получить сайт по id.
@@ -22,12 +21,12 @@ interface Repository {
     /**
      * Получить список маршрутов по userId.
      */
-//    suspend fun getAllRoutes(): List<Route>
+    suspend fun getAllRoutes(): List<Route>
 
     /**
      * Добавить новый маршрут.
      */
-    suspend fun addNewRoute(planned: List<Sight>)
+    suspend fun addNewRoute(planned: List<Sight>, name: String)
 
     /**
      * Получить список пройденных маршрутов.

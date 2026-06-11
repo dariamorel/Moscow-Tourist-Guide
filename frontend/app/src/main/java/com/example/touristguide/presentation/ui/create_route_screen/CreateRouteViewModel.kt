@@ -26,10 +26,10 @@ class CreateRouteViewModel(
         _routeName.value = name
     }
 
-    fun createRoute() {
+    fun createRoute(name: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                repository.addNewRoute(_optimizedSightsOrder.value.sights)
+                repository.addNewRoute(_optimizedSightsOrder.value.sights, name)
             } catch (e: Exception) {
                 Log.e(Repository.REPOSITORY_TAG, "Error while creating route: ${e.message}.")
             }

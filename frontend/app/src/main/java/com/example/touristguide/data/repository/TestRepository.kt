@@ -21,8 +21,7 @@ class TestRepository: Repository {
     private val allSights: List<Sight>? = null
     private val categoriesList: List<String>? = null
 
-    private val _allRoutes = MutableStateFlow<List<Route>>(mutableListOf())
-    override val allRoutes = _allRoutes.asStateFlow()
+    private var allRoutes: List<Route> = emptyList()
 
     override suspend fun getSight(sightId: Int): Sight {
         return getAllSights().find { sightId == it.id }!!
@@ -149,41 +148,46 @@ class TestRepository: Repository {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun addNewRoute(planned: List<Sight>) {
-        val id = (_allRoutes.value.maxOfOrNull { it.id } ?: 0) + 1
-        val changedRoutes = _allRoutes.value.toMutableList()
+    override suspend fun addNewRoute(planned: List<Sight>, name: String) {
+        val id = (allRoutes.maxOfOrNull { it.id } ?: 0) + 1
+        val changedRoutes = allRoutes.toMutableList()
         changedRoutes.add(Route(
             id = id,
+            name = name,
             planned = planned,
             isPassed = emptyMap(),
             totalTime = "2 h",
             date = OffsetDateTime.now(),
             status = Route.Status.NOT_STARTED
         ))
-        _allRoutes.value = changedRoutes
+        allRoutes = changedRoutes
         Log.d(DB_TAG, "New route added: ${id}.")
     }
 
+    override suspend fun getAllRoutes(): List<Route> {
+        return allRoutes
+    }
+
     override suspend fun getPassedRoutes(): List<Route> {
-        return _allRoutes.value.filter { it.status == Route.Status.PASSED }
+        return allRoutes.filter { it.status == Route.Status.PASSED }
     }
 
     override suspend fun getDeclinedRoutes(): List<Route> {
-        return _allRoutes.value.filter { it.status == Route.Status.DECLINED }
+        return allRoutes.filter { it.status == Route.Status.DECLINED }
     }
 
     override suspend fun getRoutesInProgress(): List<Route> {
-        return _allRoutes.value.filter { it.status == Route.Status.IN_PROGRESS }
+        return allRoutes.filter { it.status == Route.Status.IN_PROGRESS }
     }
 
     override suspend fun updateRoute(
         routeId: Int,
         newRoute: Route
     ) {
-        val changedRoutes = _allRoutes.value.toMutableList()
+        val changedRoutes = allRoutes.toMutableList()
         changedRoutes.removeIf { it.id == routeId }
         changedRoutes.add(newRoute)
-        _allRoutes.value = changedRoutes
+        allRoutes = changedRoutes
     }
 
     override suspend fun optimizeRoute(sights: List<Int>): OptimizedSightsOrder {
