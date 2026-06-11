@@ -52,7 +52,7 @@ interface Repository {
     /**
      * Получить оптимизированный маршрут.
      */
-    suspend fun optimizeRoute(sights: List<Sight>): OptimizedSightsOrder
+    suspend fun optimizeRoute(sights: List<Int>): OptimizedSightsOrder
 
     /**
      * Получить список возможных достижений.

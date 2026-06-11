@@ -76,7 +76,7 @@ class SightsViewModel(
 
     fun createRoute() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.addNewRoute(newRouteOrder.toMutableList())
+            repository.addNewRoute(newRouteOrder.toMutableList() )
             newRouteOrder.clear()
             _sightStatuses.value = emptyMap()
         }

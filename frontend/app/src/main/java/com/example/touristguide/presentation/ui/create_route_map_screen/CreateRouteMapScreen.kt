@@ -25,14 +25,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.di.PresentationComponentHolder
-import com.example.touristguide.presentation.map_layer.MapMarkers
+import com.example.touristguide.presentation.ui.map_layer.MapMarkers
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateRouteMapScreen(
-    onRouteCreate: () -> Unit,
+    onRouteCreate: (List<Sight>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: CreateRouteMapViewModel = viewModel(
@@ -149,7 +150,7 @@ fun CreateRouteMapScreen(
                 )
 
                 CreateRouteButton(
-                    onClick = onRouteCreate,
+                    onClick = { onRouteCreate(routeSights) },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 24.dp)

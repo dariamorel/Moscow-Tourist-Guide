@@ -138,9 +138,9 @@ fun SightBottomSheetContent(
         Spacer(modifier = Modifier.height(if (isExpanded) 12.dp else 8.dp))
 
         if (!isExpanded) {
-            sight.subway?.takeIf { it.isNotBlank() }?.let { subway ->
+            sight.address?.takeIf { it.isNotBlank() }?.let { address ->
                 Text(
-                    text = "м. $subway",
+                    text = address,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF757575)
                 )
@@ -157,6 +157,15 @@ fun SightBottomSheetContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            sight.address?.takeIf { it.isNotBlank() }?.let { address ->
+                Text(
+                    text = address,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF757575)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
 
             sight.subway?.takeIf { it.isNotBlank() }?.let { subway ->
                 Text(

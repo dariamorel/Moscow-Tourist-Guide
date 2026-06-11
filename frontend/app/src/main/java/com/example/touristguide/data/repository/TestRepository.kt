@@ -186,9 +186,9 @@ class TestRepository: Repository {
         _allRoutes.value = changedRoutes
     }
 
-    override suspend fun optimizeRoute(sights: List<Sight>): OptimizedSightsOrder {
+    override suspend fun optimizeRoute(sights: List<Int>): OptimizedSightsOrder {
         return OptimizedSightsOrder(
-            sights = sights,
+            sights = sights.map { getSight(it) }.reversed(),
             totalTime = "2 h"
         )
     }

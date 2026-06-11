@@ -1,7 +1,8 @@
-package com.example.touristguide.presentation.map_layer
+package com.example.touristguide.presentation.ui.map_layer
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
@@ -105,7 +106,7 @@ private fun createMarkerDrawable(
     val density = context.resources.displayMetrics.density
     val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = 11f * density
-        color = android.graphics.Color.BLACK
+        color = Color.BLACK
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         textAlign = Paint.Align.CENTER
     }
