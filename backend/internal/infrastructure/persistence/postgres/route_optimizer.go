@@ -23,8 +23,9 @@ func NewRouteOptimizer(db *pgxpool.Pool) domainservices.RouteOptimizer {
 
 func (o *RouteOptimizer) Optimize(ctx context.Context, sights []*entity.Sight) (*domainservices.OptimizationResult, error) {
 	n := len(sights)
+	
 	if n > 20 {
-		return nil, domain.ErrInvalidInput
+		return nil, domain.ErrInvalidInput 
 	}
 	if n <= 2 {
 		totalTime, err := o.getTravelTime(ctx, sights[0].ID, sights[1].ID)
@@ -42,49 +43,7 @@ func (o *RouteOptimizer) Optimize(ctx context.Context, sights []*entity.Sight) (
 		return nil, err
 	}
 
-	m := n + 1
-	augMatrix := make([][]float64, m)
-	for i := range augMatrix {
-		augMatrix[i] = make([]float64, m)
-		for j := range augMatrix[i] {
-			if i < n && j < n {
-				augMatrix[i][j] = timeMatrix[i][j]
-			} else if i == n || j == n {
-				augMatrix[i][j] = 0
-			}
-		}
-	}
-
-	bestCycle, _ := o.findOptimalCycleHeldKarp(augMatrix, m)
-
-	var path []int
-	for _, idx := range bestCycle {
-		if idx < n {
-			path = append(path, idx)
-		}
-	}
-
-	optimizedSights := make([]*entity.Sight, n)
-	var totalSeconds float64
-	for i, idx := range path {
-		optimizedSights[i] = sights[idx]
-		if i > 0 {
-			totalSeconds += timeMatrix[path[i-1]][idx]
-		}
-	}
-
-	return &domainservices.OptimizationResult{
-		OptimizedOrder: optimizedSights,
-		TotalTime:      time.Duration(totalSeconds * float64(time.Second)),
-	}, nil
-}
-
-func (o *RouteOptimizer) findOptimalCycleHeldKarp(timeMatrix [][]float64, n int) ([]int, float64) {
-	if n <= 2 {
-		return []int{0, 1}, timeMatrix[0][1] + timeMatrix[1][0]
-	}
-
-	M := n - 1
+	M := n - 2
 	INF := math.MaxFloat64
 
 	dp := make([][]float64, 1<<M)
@@ -99,16 +58,16 @@ func (o *RouteOptimizer) findOptimalCycleHeldKarp(timeMatrix [][]float64, n int)
 	}
 
 	for i := 0; i < M; i++ {
-		dp[1 << i][i] = timeMatrix[0][i+1]
+		dp[1<<i][i] = timeMatrix[0][i+1]
 	}
 
 	for mask := 1; mask < (1 << M); mask++ {
 		for last := 0; last < M; last++ {
-			if (mask&(1<<last)) == 0 || dp[mask][last] == INF {
+			if (mask & (1 << last)) == 0 || dp[mask][last] == INF {
 				continue
 			}
 			for next := 0; next < M; next++ {
-				if (mask&(1<<next)) != 0 {
+				if (mask & (1 << next)) != 0 {
 					continue
 				}
 				newMask := mask | (1 << next)
@@ -124,28 +83,38 @@ func (o *RouteOptimizer) findOptimalCycleHeldKarp(timeMatrix [][]float64, n int)
 	fullMask := (1 << M) - 1
 	bestCost := INF
 	bestLast := -1
+
 	for i := 0; i < M; i++ {
-		cost := dp[fullMask][i] + timeMatrix[i+1][0]
+		cost := dp[fullMask][i] + timeMatrix[i+1][n-1]
 		if cost < bestCost {
 			bestCost = cost
 			bestLast = i
 		}
 	}
 
-	cycle := make([]int, n)
-	cycle[0] = 0
+	path := make([]int, n)
+	path[0] = 0
+	path[n-1] = n - 1
+
 	curr := bestLast
 	mask := fullMask
 	for step := M - 1; step >= 0; step-- {
-		cycle[step+1] = curr + 1
+		path[step+1] = curr + 1
 		prev := parent[mask][curr]
 		mask ^= (1 << curr)
 		curr = prev
 	}
 
-	return cycle, bestCost
-}
+	optimizedSights := make([]*entity.Sight, n)
+	for i, idx := range path {
+		optimizedSights[i] = sights[idx]
+	}
 
+	return &domainservices.OptimizationResult{
+		OptimizedOrder: optimizedSights,
+		TotalTime:      time.Duration(bestCost * float64(time.Second)),
+	}, nil
+}
 
 func (o *RouteOptimizer) buildTimeMatrix(ctx context.Context, sights []*entity.Sight) ([][]float64, error) {
 	n := len(sights)
