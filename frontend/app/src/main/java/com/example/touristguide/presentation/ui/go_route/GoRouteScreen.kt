@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,9 +28,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -49,14 +54,29 @@ import com.example.touristguide.presentation.di.PresentationComponentHolder
 fun GoRouteScreen(
     route: Route,
     onClose: () -> Unit,
+    onOpenSight: (Sight) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: GoRouteViewModel = viewModel(
         factory = PresentationComponentHolder.component.createGoRouteViewModel(route)
     )
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshIsPassed()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     val isStarted by viewModel.isStarted.collectAsState()
     val currentIndex by viewModel.currentIndex.collectAsState()
+    val isPassedMap by viewModel.isPassed.collectAsState()
 
     Column(
         modifier = modifier
@@ -74,10 +94,12 @@ fun GoRouteScreen(
             ActiveRouteContent(
                 sights = viewModel.sights,
                 currentIndex = currentIndex,
+                isPassedMap = isPassedMap,
                 canGoPrevious = viewModel.canGoPrevious(currentIndex),
                 canGoNext = viewModel.canGoNext(currentIndex),
                 onPrevious = viewModel::goToPrevious,
                 onNext = viewModel::goToNext,
+                onOpenSight = onOpenSight,
                 onDeclineRoute = { viewModel.declineRoute(onClose) }
             )
         }
@@ -149,13 +171,16 @@ private fun StartRouteContent(onStart: () -> Unit) {
 private fun ActiveRouteContent(
     sights: List<Sight>,
     currentIndex: Int,
+    isPassedMap: Map<Int, Boolean>,
     canGoPrevious: Boolean,
     canGoNext: Boolean,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
+    onOpenSight: (Sight) -> Unit,
     onDeclineRoute: () -> Unit
 ) {
     val currentSight = sights.getOrNull(currentIndex) ?: return
+    val isPassed = isPassedMap[currentSight.id] == true
 
     Box(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -173,6 +198,8 @@ private fun ActiveRouteContent(
 
             SightRouteCard(
                 sight = currentSight,
+                isPassed = isPassed,
+                onOpenClick = { onOpenSight(currentSight) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 8.dp)
@@ -227,58 +254,88 @@ private fun RouteArrowButton(
 @Composable
 private fun SightRouteCard(
     sight: Sight,
+    isPassed: Boolean,
+    onOpenClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = Color(0xFFF5F5F5)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+    val textColor = if (isPassed) Color(0xFF757575) else Color.Black
+
+    Box(modifier = modifier) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = Color(0xFFF5F5F5)
         ) {
-            AsyncImage(
-                model = sight.image,
-                contentDescription = sight.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
+            Column(modifier = Modifier.padding(16.dp)) {
+                AsyncImage(
+                    model = sight.image,
+                    contentDescription = sight.title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = sight.title,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.Black
-            )
-
-            sight.address?.takeIf { it.isNotBlank() }?.let { address ->
                 Text(
-                    text = address,
-                    modifier = Modifier.padding(top = 8.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Black
+                    text = sight.title,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = textColor
                 )
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                sight.address?.takeIf { it.isNotBlank() }?.let { address ->
+                    Text(
+                        text = address,
+                        modifier = Modifier.padding(top = 8.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = textColor
+                    )
+                }
 
-            Button(
-                onClick = { },
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2B2B2B),
-                    contentColor = Color.White
-                )
-            ) {
-                Text(
-                    text = "Открыть точку",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onOpenClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isPassed) Color(0xFFBDBDBD) else Color(0xFF2B2B2B),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = if (isPassed) "Посмотреть" else "Открыть точку",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                    )
+                }
             }
         }
+
+        if (isPassed) {
+            PassedSightBadge(
+                modifier = Modifier.align(Alignment.TopEnd)
+            )
+        }
+    }
+}
+
+@Composable
+private fun PassedSightBadge(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .padding(top = 8.dp, end = 8.dp),
+        shape = CircleShape,
+        color = Color(0xFFC8E6C9)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = null,
+            modifier = Modifier
+                .padding(6.dp)
+                .size(18.dp),
+            tint = Color.Black
+        )
     }
 }

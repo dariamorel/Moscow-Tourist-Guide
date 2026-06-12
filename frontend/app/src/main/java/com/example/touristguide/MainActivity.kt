@@ -20,8 +20,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Route
+import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteMapScreen
 import com.example.touristguide.presentation.ui.create_route_screen.CreateRouteScreen
+import com.example.touristguide.presentation.ui.detailed_sight_screen.DetailedSightScreen
 import com.example.touristguide.presentation.ui.go_route.GoRouteScreen
 import com.example.touristguide.presentation.ui.my_routes_screen.MyRoutesScreen
 import com.example.touristguide.presentation.ui.optimizing_loading_screen.OptimizingLoadingScreen
@@ -47,7 +49,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class Screens {
-    CREATE_ROUTE_MAP, OPTIMIZING_LOADING, CREATE_ROUTE, MY_ROUTES, GO_ROUTE
+    CREATE_ROUTE_MAP, OPTIMIZING_LOADING, CREATE_ROUTE, MY_ROUTES, GO_ROUTE, DETAILED_SIGHT
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -119,6 +121,29 @@ fun MainScreen(
             route?.let {
                 GoRouteScreen(
                     route = route,
+                    modifier = modifier,
+                    onClose = { navController.popBackStack() },
+                    onOpenSight = { sight ->
+                        navController.currentBackStackEntry?.savedStateHandle?.set("routeId", route.id)
+                        navController.currentBackStackEntry?.savedStateHandle?.set("sight", sight)
+                        navController.navigate(Screens.DETAILED_SIGHT.name)
+                    }
+                )
+            }
+        }
+
+        composable(Screens.DETAILED_SIGHT.name) {
+            val routeId = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Int>("routeId")
+            val sight = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Sight>("sight")
+
+            if (routeId != null && sight != null) {
+                DetailedSightScreen(
+                    routeId = routeId,
+                    sight = sight,
                     modifier = modifier,
                     onClose = { navController.popBackStack() }
                 )

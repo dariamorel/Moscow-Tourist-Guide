@@ -27,6 +27,11 @@ class GoRouteViewModel(
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex: StateFlow<Int> = _currentIndex.asStateFlow()
 
+    private val _isPassed = MutableStateFlow(route.isPassed)
+    val isPassed: StateFlow<Map<Int, Boolean>> = _isPassed.asStateFlow()
+
+    fun isSightPassed(sightId: Int): Boolean = _isPassed.value[sightId] == true
+
     fun startRoute() {
         _isStarted.value = true
         viewModelScope.launch(Dispatchers.IO) {
@@ -40,6 +45,17 @@ class GoRouteViewModel(
                 }
             } catch (e: Exception) {
                 Log.e(Repository.REPOSITORY_TAG, "Error while starting route: ${e.message}.")
+            }
+        }
+    }
+
+    fun refreshIsPassed() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val currentRoute = repository.getAllRoutes().find { it.id == route.id } ?: return@launch
+                _isPassed.value = currentRoute.isPassed
+            } catch (e: Exception) {
+                Log.e(Repository.REPOSITORY_TAG, "Error while refreshing route: ${e.message}.")
             }
         }
     }
