@@ -127,6 +127,9 @@ fun MainScreen(
                         navController.currentBackStackEntry?.savedStateHandle?.set("routeId", route.id)
                         navController.currentBackStackEntry?.savedStateHandle?.set("sight", sight)
                         navController.navigate(Screens.DETAILED_SIGHT.name)
+                    },
+                    onNavigateToMain = {
+                        navController.popBackStack(Screens.MY_ROUTES.name, inclusive = false)
                     }
                 )
             }

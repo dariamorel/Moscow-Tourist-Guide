@@ -31,6 +31,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.touristguide.domain.entities.Route
+import com.example.touristguide.domain.entities.progressPercent
 import com.example.touristguide.presentation.di.PresentationComponentHolder
 import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteButton
 import java.time.format.DateTimeFormatter
@@ -101,7 +102,7 @@ private fun RouteListItem(
 ) {
     val isInactive = route.status == Route.Status.PASSED || route.status == Route.Status.DECLINED
     val textColor = if (isInactive) Color(0xFF9E9E9E) else Color.Black
-    val progress = routeProgressPercent(route)
+    val progress = route.progressPercent()
     val dateText = route.date?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) ?: ""
 
     Column(
@@ -181,8 +182,3 @@ private fun Route.Status.displayName(): String = when (this) {
     Route.Status.DECLINED -> "Отменен"
 }
 
-private fun routeProgressPercent(route: Route): Int {
-    if (route.planned.isEmpty()) return 0
-    val passedCount = route.isPassed.count { it.value }
-    return passedCount * 100 / route.planned.size
-}

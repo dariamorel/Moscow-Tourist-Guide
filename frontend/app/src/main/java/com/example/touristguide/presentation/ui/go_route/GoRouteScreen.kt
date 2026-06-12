@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -21,8 +22,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,9 +33,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -44,6 +42,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.touristguide.domain.entities.Route
@@ -55,6 +56,7 @@ fun GoRouteScreen(
     route: Route,
     onClose: () -> Unit,
     onOpenSight: (Sight) -> Unit,
+    onNavigateToMain: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: GoRouteViewModel = viewModel(
@@ -77,6 +79,8 @@ fun GoRouteScreen(
     val isStarted by viewModel.isStarted.collectAsState()
     val currentIndex by viewModel.currentIndex.collectAsState()
     val isPassedMap by viewModel.isPassed.collectAsState()
+    val progress by viewModel.progress.collectAsState()
+    val isRouteCompleted by viewModel.isRouteCompleted.collectAsState()
 
     Column(
         modifier = modifier
@@ -85,13 +89,14 @@ fun GoRouteScreen(
     ) {
         GoRouteHeader(
             title = viewModel.routeName,
+            progress = progress,
             onClose = onClose
         )
 
-        if (!isStarted) {
-            StartRouteContent(onStart = viewModel::startRoute)
-        } else {
-            ActiveRouteContent(
+        when {
+            isRouteCompleted -> RouteCompletedContent(onNavigateToMain = onNavigateToMain)
+            !isStarted -> StartRouteContent(onStart = viewModel::startRoute)
+            else -> ActiveRouteContent(
                 sights = viewModel.sights,
                 currentIndex = currentIndex,
                 isPassedMap = isPassedMap,
@@ -109,6 +114,7 @@ fun GoRouteScreen(
 @Composable
 private fun GoRouteHeader(
     title: String,
+    progress: Float,
     onClose: () -> Unit
 ) {
     Box(
@@ -139,7 +145,60 @@ private fun GoRouteHeader(
         }
     }
 
-    HorizontalDivider(color = Color(0xFFE0E0E0))
+    LinearProgressIndicator(
+        progress = { progress.coerceIn(0f, 1f) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        color = Color(0xFF424242),
+        trackColor = Color(0xFFE0E0E0)
+    )
+}
+
+@Composable
+private fun RouteCompletedContent(onNavigateToMain: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        FireworksEffect(modifier = Modifier.fillMaxSize())
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 20.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Маршрут пройден!",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    ),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Button(
+                onClick = onNavigateToMain,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2B2B2B),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "На главный экран",
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -325,17 +384,18 @@ private fun SightRouteCard(
 private fun PassedSightBadge(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
-            .padding(top = 8.dp, end = 8.dp),
+            .offset(x = 10.dp, y = (-10).dp)
+            .size(40.dp),
         shape = CircleShape,
         color = Color(0xFFC8E6C9)
     ) {
-        Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = null,
-            modifier = Modifier
-                .padding(6.dp)
-                .size(18.dp),
-            tint = Color.Black
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = Color.Black
+            )
+        }
     }
 }

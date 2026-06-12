@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
+import com.example.touristguide.domain.entities.isFullyPassed
+import com.example.touristguide.domain.entities.progressFraction
 import com.example.touristguide.domain.interfaces.Repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +32,18 @@ class GoRouteViewModel(
     private val _isPassed = MutableStateFlow(route.isPassed)
     val isPassed: StateFlow<Map<Int, Boolean>> = _isPassed.asStateFlow()
 
+    private val _isRouteCompleted = MutableStateFlow(
+        route.status == Route.Status.PASSED || route.isFullyPassed()
+    )
+    val isRouteCompleted: StateFlow<Boolean> = _isRouteCompleted.asStateFlow()
+
+    private val _progress = MutableStateFlow(route.progressFraction())
+    val progress: StateFlow<Float> = _progress.asStateFlow()
+
+    init {
+        refreshIsPassed()
+    }
+
     fun isSightPassed(sightId: Int): Boolean = _isPassed.value[sightId] == true
 
     fun startRoute() {
@@ -54,10 +68,27 @@ class GoRouteViewModel(
             try {
                 val currentRoute = repository.getAllRoutes().find { it.id == route.id } ?: return@launch
                 _isPassed.value = currentRoute.isPassed
+                updateProgress(currentRoute.isPassed)
+
+                if (currentRoute.isFullyPassed()) {
+                    _isRouteCompleted.value = true
+                    _progress.value = 1f
+                    if (currentRoute.status != Route.Status.PASSED) {
+                        repository.updateRoute(
+                            route.id,
+                            currentRoute.copy(status = Route.Status.PASSED)
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 Log.e(Repository.REPOSITORY_TAG, "Error while refreshing route: ${e.message}.")
             }
         }
+    }
+
+    private fun updateProgress(isPassedMap: Map<Int, Boolean>) {
+        val updatedRoute = route.copy(isPassed = isPassedMap)
+        _progress.value = updatedRoute.progressFraction()
     }
 
     fun goToPrevious() {
