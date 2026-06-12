@@ -16,6 +16,7 @@ import com.example.touristguide.presentation.ui.go_route.GoRouteViewModel
 import com.example.touristguide.presentation.ui.my_routes_screen.MyRoutesViewModel
 import com.example.touristguide.presentation.ui.optimizing_loading_screen.OptimizingLoadingViewModel
 import com.example.touristguide.presentation.ui.profile_screen.ProfileViewModel
+import com.example.touristguide.presentation.ui.route_map_screen.RouteMapViewModel
 
 class PresentationComponent(
     private val dependencies: Dependencies
@@ -111,6 +112,14 @@ class PresentationComponent(
                 ProfileViewModel(
                     repository = dependencies.getRepository()
                 )
+            }
+        }
+    }
+
+    fun createRouteMapViewModel(route: Route): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                RouteMapViewModel(route = route)
             }
         }
     }

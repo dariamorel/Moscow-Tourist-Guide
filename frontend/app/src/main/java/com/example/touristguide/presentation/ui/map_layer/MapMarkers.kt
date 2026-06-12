@@ -31,6 +31,7 @@ fun MapMarkers(
     mapView: MapView,
     sights: List<Sight>,
     selectedSightId: Int? = null,
+    showAllLabels: Boolean = false,
     onMapClick: () -> Unit = {},
     onMarkerClick: (Sight) -> Unit = {}
 ) {
@@ -52,7 +53,7 @@ fun MapMarkers(
         mapView.overlays.add(0, eventsOverlay)
     }
 
-    LaunchedEffect(sights, selectedSightId) {
+    LaunchedEffect(sights, selectedSightId, showAllLabels) {
         mapView.overlays.removeAll {
             it is FolderOverlay
         }
@@ -66,7 +67,7 @@ fun MapMarkers(
                 context = ctx,
                 drawableResId = R.drawable.ic_location_on,
                 sizeDp = markerSize,
-                label = if (isSelected) sight.title else null
+                label = if (isSelected || showAllLabels) sight.title else null
             )
 
             val marker = Marker(mapView).apply {

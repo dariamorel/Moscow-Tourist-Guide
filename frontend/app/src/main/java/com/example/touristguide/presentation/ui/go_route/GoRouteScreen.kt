@@ -38,6 +38,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.touristguide.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,6 +58,7 @@ fun GoRouteScreen(
     route: Route,
     onClose: () -> Unit,
     onOpenSight: (Sight) -> Unit,
+    onOpenMap: () -> Unit,
     onNavigateToMain: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -90,7 +93,8 @@ fun GoRouteScreen(
         GoRouteHeader(
             title = viewModel.routeName,
             progress = progress,
-            onClose = onClose
+            onClose = onClose,
+            onOpenMap = onOpenMap
         )
 
         when {
@@ -115,13 +119,26 @@ fun GoRouteScreen(
 private fun GoRouteHeader(
     title: String,
     progress: Float,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onOpenMap: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
+        IconButton(
+            onClick = onOpenMap,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_map),
+                contentDescription = "Карта маршрута",
+                modifier = Modifier.size(28.dp),
+                tint = Color.Black
+            )
+        }
+
         Text(
             text = title,
             modifier = Modifier.align(Alignment.Center),

@@ -37,6 +37,7 @@ import com.example.touristguide.presentation.ui.go_route.GoRouteScreen
 import com.example.touristguide.presentation.ui.my_routes_screen.MyRoutesScreen
 import com.example.touristguide.presentation.ui.optimizing_loading_screen.OptimizingLoadingScreen
 import com.example.touristguide.presentation.ui.profile_screen.ProfileScreen
+import com.example.touristguide.presentation.ui.route_map_screen.RouteMapScreen
 import com.example.touristguide.ui.theme.TouristGuideTheme
 
 class MainActivity : ComponentActivity() {
@@ -60,7 +61,7 @@ class MainActivity : ComponentActivity() {
 
 enum class Screens {
     LOGIN, REGISTER, MY_ROUTES, PROFILE, CREATE_ROUTE_MAP, OPTIMIZING_LOADING,
-    CREATE_ROUTE, GO_ROUTE, DETAILED_SIGHT, ACHIEVEMENTS
+    CREATE_ROUTE, GO_ROUTE, ROUTE_MAP, DETAILED_SIGHT, ACHIEVEMENTS
 }
 
 private const val AUTH_GRAPH = "auth"
@@ -215,9 +216,26 @@ fun MainScreen(
                         navController.currentBackStackEntry?.savedStateHandle?.set("sight", sight)
                         navController.navigate(Screens.DETAILED_SIGHT.name)
                     },
+                    onOpenMap = {
+                        navController.currentBackStackEntry?.savedStateHandle?.set("route", route)
+                        navController.navigate(Screens.ROUTE_MAP.name)
+                    },
                     onNavigateToMain = {
                         navController.popBackStack(Screens.MY_ROUTES.name, inclusive = false)
                     }
+                )
+            }
+        }
+
+        composable(Screens.ROUTE_MAP.name) {
+            val route = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Route>("route")
+            route?.let {
+                RouteMapScreen(
+                    route = route,
+                    modifier = modifier,
+                    onBackToRoute = { navController.popBackStack() }
                 )
             }
         }
