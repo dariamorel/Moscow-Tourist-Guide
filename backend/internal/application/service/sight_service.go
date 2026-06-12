@@ -48,8 +48,8 @@ func (s *SightService) ListSights(ctx context.Context, f SightFilter) ([]*entity
 	if f.Limit <= 0 {
 		f.Limit = 20
 	}
-	if f.Limit > 100 {
-		f.Limit = 100
+	if f.Limit > 1000 {
+		f.Limit = 1000
 	}
 	if f.Offset < 0 {
 		f.Offset = 0
