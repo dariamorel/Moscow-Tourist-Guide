@@ -24,4 +24,5 @@ data class Route(
         val j = compareList.indexOf(other.status)
         return if (i < j) -1 else if (i > j) 1 else 0
     }
+
 }

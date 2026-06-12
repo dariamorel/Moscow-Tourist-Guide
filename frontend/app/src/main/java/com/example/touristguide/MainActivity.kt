@@ -22,9 +22,9 @@ import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteMapScreen
 import com.example.touristguide.presentation.ui.create_route_screen.CreateRouteScreen
+import com.example.touristguide.presentation.ui.go_route.GoRouteScreen
 import com.example.touristguide.presentation.ui.my_routes_screen.MyRoutesScreen
 import com.example.touristguide.presentation.ui.optimizing_loading_screen.OptimizingLoadingScreen
-import com.example.touristguide.presentation.ui.route_screen.RouteScreen
 import com.example.touristguide.ui.theme.TouristGuideTheme
 
 class MainActivity : ComponentActivity() {
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class Screens {
-    CREATE_ROUTE_MAP, OPTIMIZING_LOADING, CREATE_ROUTE, MY_ROUTES, ROUTE
+    CREATE_ROUTE_MAP, OPTIMIZING_LOADING, CREATE_ROUTE, MY_ROUTES, GO_ROUTE
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -78,7 +78,10 @@ fun MainScreen(
                 sightIds = ids,
                 modifier = modifier
             ) { optimizedSightsOrder ->
-                navController.currentBackStackEntry?.savedStateHandle?.set("optimizedOrder", optimizedSightsOrder)
+                navController.currentBackStackEntry?.savedStateHandle?.set(
+                    "optimizedOrder",
+                    optimizedSightsOrder
+                )
                 navController.navigate(Screens.CREATE_ROUTE.name)
             }
         }
@@ -104,19 +107,20 @@ fun MainScreen(
                 },
                 onRouteClick = { route ->
                     navController.currentBackStackEntry?.savedStateHandle?.set("route", route)
-                    navController.navigate(Screens.ROUTE.name)
+                    navController.navigate(Screens.GO_ROUTE.name)
                 }
             )
         }
 
-        composable(Screens.ROUTE.name) {
+        composable(Screens.GO_ROUTE.name) {
             val route = navController.previousBackStackEntry
                 ?.savedStateHandle
                 ?.get<Route>("route")
             route?.let {
-                RouteScreen(
+                GoRouteScreen(
                     route = route,
-                    modifier = modifier
+                    modifier = modifier,
+                    onClose = { navController.popBackStack() }
                 )
             }
         }

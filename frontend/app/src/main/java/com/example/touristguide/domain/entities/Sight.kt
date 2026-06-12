@@ -14,7 +14,6 @@ data class Sight(
     val phone: String? = null,
     val description: String,
     val bodyText: String,
-    val url: String,
     val coords: GeoPoint,
     val subway: String? = null,
     val categories: List<String> = emptyList()
