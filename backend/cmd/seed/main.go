@@ -139,7 +139,7 @@ func main() {
 	log.Printf("   - Tags processed: %d", tagsCreated)
 	log.Printf("   - Sight-Tag links: %d", linksCreated)
 
-	log.Println("Generating travel time edges between all sights...")
+	 log.Println("Generating travel time edges between all sights...")
 	_, err = db.Exec(ctx, `
 		INSERT INTO tour_guide.time_between_sights (sight1_id, sight2_id, travel_time, distance_meters)
 		SELECT 
@@ -151,7 +151,7 @@ func main() {
 			POWER(SIN((s2.lat - s1.lat) * PI() / 360), 2) +
 			COS(s1.lat * PI() / 180) * COS(s2.lat * PI() / 180) *
 			POWER(SIN((s2.lon - s1.lon) * PI() / 360), 2)
-			))) * 180 / 5 * 60
+			))) * 12
 			)::int
 		)) AS travel_time,
 		ROUND(
