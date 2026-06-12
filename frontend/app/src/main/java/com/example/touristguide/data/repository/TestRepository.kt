@@ -24,7 +24,6 @@ class TestRepository(
     private val prefs: SharedPreferences
 ): Repository {
     private val allSights: List<Sight>? = null
-    private val categoriesList: List<String>? = null
 
     private var allRoutes: List<Route> = emptyList()
 
@@ -61,7 +60,7 @@ class TestRepository(
         )
     )
 
-    override suspend fun getSight(sightId: Int): Sight {
+    suspend fun getSightById(sightId: Int): Sight {
         return getAllSights().find { sightId == it.id }!!
     }
 
@@ -197,18 +196,6 @@ class TestRepository(
         return allRoutes
     }
 
-    override suspend fun getPassedRoutes(): List<Route> {
-        return allRoutes.filter { it.status == Route.Status.PASSED }
-    }
-
-    override suspend fun getDeclinedRoutes(): List<Route> {
-        return allRoutes.filter { it.status == Route.Status.DECLINED }
-    }
-
-    override suspend fun getRoutesInProgress(): List<Route> {
-        return allRoutes.filter { it.status == Route.Status.IN_PROGRESS }
-    }
-
     override suspend fun updateRoute(
         routeId: Int,
         newRoute: Route
@@ -221,30 +208,12 @@ class TestRepository(
 
     override suspend fun optimizeRoute(sights: List<Int>): OptimizedSightsOrder {
         return OptimizedSightsOrder(
-            sights = sights.map { getSight(it) }.reversed(),
+            sights = sights.map { getSightById(it) }.reversed(),
             totalTime = "2 h"
         )
     }
 
     override suspend fun getAllAchievements(): List<Achievement> = achievements
-
-    override suspend fun getCompletedAchievements(): List<Achievement> =
-        achievements.filter { it.progress >= it.requiredCount }
-
-    override suspend fun updateAchievement(
-        achievementId: Int,
-        newAchievement: Achievement
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAllCategories(): List<String> {
-        if (categoriesList != null) {
-            return categoriesList
-        }
-        val allSightsList = getAllSights()
-        return allSightsList.flatMap { it.categories }.distinct().sorted()
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun register(login: String, password: String) {

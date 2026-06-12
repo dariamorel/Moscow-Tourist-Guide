@@ -58,7 +58,7 @@ fun OptimizingLoadingScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Маршрут оптимизируется по времени обхода достопримечательностей, чтобы ваше путешествие было насыщенное и продуктивное!",
+            text = "Маршрут оптимизируется по времени обхода достопримечательностей, чтобы ваше путешествие было насыщенным и продуктивным!",
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Black,
             textAlign = TextAlign.Center
