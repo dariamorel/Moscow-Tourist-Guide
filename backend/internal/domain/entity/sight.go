@@ -9,6 +9,7 @@ import(
 
 type Sight struct {
 	ID          int
+	Title 		string
 	Img         string
 	Coordinates valueobject.Coordinates
 	Tags        []string

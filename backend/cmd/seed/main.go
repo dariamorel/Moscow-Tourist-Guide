@@ -37,12 +37,12 @@ func main() {
 	ctx := context.Background()
 
 	dbURL := fmt.Sprintf(
-	"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-	getEnv("DB_USER", "tourguide"),
-	getEnv("DB_PASSWORD", "secret"),
-	getEnv("DB_HOST", "localhost"),
-	getEnv("DB_PORT", "5433"),
-	getEnv("DB_NAME", "tourguide"),
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		getEnv("DB_USER", "tourguide"),
+		getEnv("DB_PASSWORD", "secret"),
+		getEnv("DB_HOST", "localhost"),
+		getEnv("DB_PORT", "5433"),
+		getEnv("DB_NAME", "tourguide"),
 	)
 
 	db, err := pgxpool.New(ctx, dbURL)
@@ -89,11 +89,11 @@ func main() {
 		}
 
 		_, err := db.Exec(ctx, `
-			INSERT INTO tour_guide.sights (id, img, lat, lon, short_desc, full_desc, timetable, addr, phone, subway)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			INSERT INTO tour_guide.sights (id, title, img, lat, lon, short_desc, full_desc, timetable, addr, phone, subway)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 			ON CONFLICT (id) DO NOTHING
-			`, s.ID, img, s.Coords.Lat, s.Coords.Lon,
-			trim(s.Title, 200), trim(fullDesc, 5000),
+			`, s.ID, trim(s.Title, 300), img, s.Coords.Lat, s.Coords.Lon,
+			trim(s.Description, 200), trim(fullDesc, 5000),
 			trim(s.Timetable, 200), trim(s.Address, 300),
 			trim(s.Phone, 50), trim(s.Subway, 100),
 		)

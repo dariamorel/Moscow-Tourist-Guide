@@ -73,6 +73,14 @@ func applyMigrations(t *testing.T, db *pgxpool.Pool) {
 	
 	_, err = db.Exec(context.Background(), string(sqlBytes))
 	require.NoError(t, err, "failed to apply migrations")
+
+	migrationPath = filepath.Join(root, "migrations", "V3__add_sight_title.sql")
+	
+	sqlBytes, err = os.ReadFile(migrationPath)
+	require.NoError(t, err, "failed to read migration file: %s", migrationPath)
+	
+	_, err = db.Exec(context.Background(), string(sqlBytes))
+	require.NoError(t, err, "failed to apply migrations")
 }
 
 func seedTestData(t *testing.T, db *pgxpool.Pool) {

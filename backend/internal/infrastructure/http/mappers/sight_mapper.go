@@ -8,6 +8,7 @@ import (
 func ToAPISight(s *entity.Sight) api.Sight {
 	return api.Sight{
 		Id:        s.ID,
+		Title:     Ptr(s.Title),
 		Img:       s.Img,
 		Lat:       s.Coordinates.Lat,
 		Lon:       s.Coordinates.Lon,

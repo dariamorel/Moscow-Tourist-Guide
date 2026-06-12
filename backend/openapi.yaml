@@ -22,6 +22,10 @@ components:
       properties:
         id:
           type: integer
+        title:
+          type: string
+          description: "Название достопримечательности"
+          example: "Московский зоопарк"
         img:
           type: string
           format: uri

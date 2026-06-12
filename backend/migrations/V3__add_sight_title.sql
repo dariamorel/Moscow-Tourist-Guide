@@ -1,0 +1,2 @@
+ALTER TABLE tour_guide.sights
+ADD COLUMN title VARCHAR(300) NOT NULL DEFAULT '';
