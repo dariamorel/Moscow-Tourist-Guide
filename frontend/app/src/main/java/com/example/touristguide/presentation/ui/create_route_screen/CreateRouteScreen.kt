@@ -60,7 +60,7 @@ fun CreateRouteScreen(
         OutlinedTextField(
             value = routeName,
             onValueChange = viewModel::updateRouteName,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier,
             textStyle = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp
@@ -69,7 +69,7 @@ fun CreateRouteScreen(
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = null,
-                    tint = Color(0xFF757575)
+                    tint = Color(0xFF757575),
                 )
             },
             colors = TextFieldDefaults.colors(

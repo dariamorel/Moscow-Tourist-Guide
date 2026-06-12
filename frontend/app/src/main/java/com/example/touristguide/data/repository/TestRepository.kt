@@ -23,6 +23,39 @@ class TestRepository: Repository {
 
     private var allRoutes: List<Route> = emptyList()
 
+    private val achievements: List<Achievement> = listOf(
+        Achievement(
+            id = 1,
+            type = Achievement.Type.TAG_COLLECTOR,
+            name = "Исследователь",
+            description = "Посетить 5 мест с тэгом музеи",
+            iconUrl = "https://media.kudago.com/images/place/67/5f/675f550a4878b642807120675afa1646.jpg",
+            requiredCount = 6,
+            progress = 5,
+            tag = "музеи"
+        ),
+        Achievement(
+            id = 2,
+            type = Achievement.Type.SIGHTS_VISITED,
+            name = "Исследователь",
+            description = "Посетить 5 мест с тэгом музеи",
+            iconUrl = "https://media.kudago.com/images/place/67/5f/675f550a4878b642807120675afa1646.jpg",
+            requiredCount = 6,
+            progress = 2,
+            tag = "музеи"
+        ),
+        Achievement(
+            id = 3,
+            type = Achievement.Type.ROUTES_COMPLETED,
+            name = "Исследователь",
+            description = "Посетить 5 мест с тэгом музеи",
+            iconUrl = "https://media.kudago.com/images/place/67/5f/675f550a4878b642807120675afa1646.jpg",
+            requiredCount = 6,
+            progress = 6,
+            tag = "музеи"
+        )
+    )
+
     override suspend fun getSight(sightId: Int): Sight {
         return getAllSights().find { sightId == it.id }!!
     }
@@ -188,13 +221,10 @@ class TestRepository: Repository {
         )
     }
 
-    override suspend fun getAllAchievements(): List<Achievement> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getAllAchievements(): List<Achievement> = achievements
 
-    override suspend fun getCompletedAchievements(): List<Achievement> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getCompletedAchievements(): List<Achievement> =
+        achievements.filter { it.progress >= it.requiredCount }
 
     override suspend fun updateAchievement(
         achievementId: Int,

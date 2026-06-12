@@ -7,6 +7,7 @@ import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.domain.interfaces.Repository
+import com.example.touristguide.presentation.ui.achievements_screen.AchievementsViewModel
 import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteMapViewModel
 import com.example.touristguide.presentation.ui.create_route_screen.CreateRouteViewModel
 import com.example.touristguide.presentation.ui.detailed_sight_screen.DetailedSightViewModel
@@ -76,6 +77,16 @@ class PresentationComponent(
                 DetailedSightViewModel(
                     routeId = routeId,
                     sight = sight,
+                    repository = dependencies.getRepository()
+                )
+            }
+        }
+    }
+
+    fun createAchievementsViewModel(): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                AchievementsViewModel(
                     repository = dependencies.getRepository()
                 )
             }

@@ -7,6 +7,7 @@ data class Achievement(
     val description: String,
     val iconUrl: String,
     val requiredCount: Int,
+    val progress: Int,
     val tag: String
 ) {
     enum class Type(type: String) {

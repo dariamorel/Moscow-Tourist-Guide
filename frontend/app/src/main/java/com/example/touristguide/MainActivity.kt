@@ -21,6 +21,7 @@ import androidx.navigation.navArgument
 import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
+import com.example.touristguide.presentation.ui.achievements_screen.AchievementsScreen
 import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteMapScreen
 import com.example.touristguide.presentation.ui.create_route_screen.CreateRouteScreen
 import com.example.touristguide.presentation.ui.detailed_sight_screen.DetailedSightScreen
@@ -49,7 +50,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class Screens {
-    CREATE_ROUTE_MAP, OPTIMIZING_LOADING, CREATE_ROUTE, MY_ROUTES, GO_ROUTE, DETAILED_SIGHT
+    CREATE_ROUTE_MAP, OPTIMIZING_LOADING, CREATE_ROUTE, MY_ROUTES, GO_ROUTE, DETAILED_SIGHT, ACHIEVEMENTS
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -59,7 +60,7 @@ fun MainScreen(
 ) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Screens.CREATE_ROUTE_MAP.name) {
+    NavHost(navController = navController, startDestination = Screens.MY_ROUTES.name) {
         composable(Screens.CREATE_ROUTE_MAP.name) {
             CreateRouteMapScreen(
                 modifier = modifier,
@@ -110,8 +111,15 @@ fun MainScreen(
                 onRouteClick = { route ->
                     navController.currentBackStackEntry?.savedStateHandle?.set("route", route)
                     navController.navigate(Screens.GO_ROUTE.name)
+                },
+                onAchievementsClick = {
+                    navController.navigate(Screens.ACHIEVEMENTS.name)
                 }
             )
+        }
+
+        composable(Screens.ACHIEVEMENTS.name) {
+            AchievementsScreen(modifier = modifier)
         }
 
         composable(Screens.GO_ROUTE.name) {
