@@ -1,5 +1,7 @@
 package com.example.touristguide.presentation.ui.my_routes_screen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,11 +44,13 @@ import com.example.touristguide.presentation.di.PresentationComponentHolder
 import com.example.touristguide.presentation.ui.create_route_map_screen.CreateRouteButton
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyRoutesScreen(
     onCreateRouteClick: () -> Unit,
     onRouteClick: (Route) -> Unit,
     onAchievementsClick: () -> Unit,
+    onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: MyRoutesViewModel = viewModel(
@@ -91,21 +95,27 @@ fun MyRoutesScreen(
 
             Row(
                 modifier = Modifier.align(Alignment.CenterEnd),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onAchievementsClick) {
+                IconButton(
+                    onClick = onAchievementsClick,
+                    modifier = Modifier.size(52.dp)
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_medal),
                         contentDescription = "Достижения",
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.size(32.dp),
                         tint = Color.Black
                     )
                 }
-                IconButton(onClick = { }) {
+                IconButton(
+                    onClick = onProfileClick,
+                    modifier = Modifier.size(52.dp)
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_person),
                         contentDescription = "Профиль",
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.size(32.dp),
                         tint = Color.Black
                     )
                 }
@@ -123,7 +133,13 @@ fun MyRoutesScreen(
             items(routes.sorted(), key = { it.id }) { route ->
                 RouteListItem(
                     route = route,
-                    onClick = { onRouteClick(route) }
+                    onClick = {
+                        if (route.status != Route.Status.PASSED &&
+                            route.status != Route.Status.DECLINED
+                        ) {
+                            onRouteClick(route)
+                        }
+                    }
                 )
                 HorizontalDivider(color = Color(0xFFE0E0E0))
             }
@@ -131,6 +147,7 @@ fun MyRoutesScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun RouteListItem(
     route: Route,
@@ -144,7 +161,13 @@ private fun RouteListItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .then(
+                if (isInactive) {
+                    Modifier
+                } else {
+                    Modifier.clickable(onClick = onClick)
+                }
+            )
             .padding(vertical = 16.dp)
     ) {
         Row(

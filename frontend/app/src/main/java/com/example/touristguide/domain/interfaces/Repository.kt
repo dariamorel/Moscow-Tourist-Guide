@@ -73,6 +73,18 @@ interface Repository {
      */
     suspend fun getAllCategories(): List<String>
 
+    suspend fun register(login: String, password: String)
+
+    suspend fun login(login: String, password: String)
+
+    fun isLogin(): Boolean
+
+    fun getUserId(): Int?
+
+    fun logout()
+
+    fun getLogin(): String?
+
     companion object {
         const val REPOSITORY_TAG = "Sights Repository Tag"
     }

@@ -1,13 +1,16 @@
 package com.example.touristguide.data.repository
 
 import android.annotation.TargetApi
+import android.content.SharedPreferences
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.content.edit
 import com.example.touristguide.domain.entities.Achievement
 import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
+import com.example.touristguide.domain.entities.User
 import com.example.touristguide.domain.interfaces.Repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +20,9 @@ import java.time.LocalTime
 import java.time.OffsetDateTime
 import kotlin.collections.distinct
 
-class TestRepository: Repository {
+class TestRepository(
+    private val prefs: SharedPreferences
+): Repository {
     private val allSights: List<Sight>? = null
     private val categoriesList: List<String>? = null
 
@@ -185,7 +190,7 @@ class TestRepository: Repository {
             status = Route.Status.NOT_STARTED
         ))
         allRoutes = changedRoutes
-        Log.d(DB_TAG, "New route added: ${id}.")
+        Log.d(Repository.REPOSITORY_TAG, "New route added: ${id}.")
     }
 
     override suspend fun getAllRoutes(): List<Route> {
@@ -241,8 +246,66 @@ class TestRepository: Repository {
         return allSightsList.flatMap { it.categories }.distinct().sorted()
     }
 
-    companion object {
-        const val DB_TAG = "DB TAG"
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun register(login: String, password: String) {
+        if (login.isBlank() || password.isBlank()) {
+            throw IllegalArgumentException("Заполните все поля")
+        }
+        if (prefs.contains("id")) {
+            throw IllegalStateException("Пользователь уже зарегистрирован")
+        }
+        val user = User(
+            id = 1,
+            login = login,
+            createdAt = OffsetDateTime.now()
+        )
+        prefs.edit {
+            putInt("id", user.id)
+            putString("login", user.login)
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun login(login: String, password: String) {
+        if (login.isBlank() || password.isBlank()) {
+            throw IllegalArgumentException("Заполните все поля")
+        }
+        if (!prefs.contains("id")) {
+            throw IllegalStateException("Пользователь не найден")
+        }
+        val storedLogin = prefs.getString("login", null)
+        if (storedLogin != null && storedLogin != login) {
+            throw IllegalStateException("Неверный логин или пароль")
+        }
+        val user = User(
+            id = 1,
+            login = login,
+            createdAt = OffsetDateTime.now()
+        )
+        prefs.edit {
+            putInt("id", user.id)
+            putString("login", user.login)
+        }
+    }
+
+    override fun isLogin(): Boolean {
+        return prefs.contains("id")
+    }
+
+    override fun getUserId(): Int? {
+        val id = prefs.getInt("id", -1)
+        if (id == -1) return null
+        return id
+    }
+
+    override fun getLogin(): String? {
+        return prefs.getString("login", null)
+    }
+
+    override fun logout() {
+        prefs.edit {
+            remove("id")
+            remove("login")
+        }
+    }
 }

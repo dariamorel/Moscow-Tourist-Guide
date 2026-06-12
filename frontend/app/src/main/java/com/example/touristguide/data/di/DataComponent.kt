@@ -1,12 +1,17 @@
 package com.example.touristguide.data.di
 
+import android.content.Context
 import com.example.touristguide.data.repository.TestRepository
 import com.example.touristguide.domain.interfaces.Repository
 
-class DataComponent {
-    val repository by lazy { createRepository() }
+class DataComponent(
+    context: Context
+) {
+    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun createRepository(): Repository {
-        return TestRepository()
+    val repository: Repository by lazy { TestRepository(prefs) }
+
+    companion object {
+        private const val PREFS_NAME = "user_prefs"
     }
 }

@@ -10,7 +10,7 @@ class Application : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        DataComponentHolder.init()
+        DataComponentHolder.init(applicationContext)
         PresentationComponentHolder.init(object : PresentationComponent.Dependencies{
             override fun getRepository(): Repository {
                 return DataComponentHolder.component.repository
