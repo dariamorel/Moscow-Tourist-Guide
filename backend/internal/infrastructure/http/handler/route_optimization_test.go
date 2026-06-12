@@ -25,14 +25,14 @@ func TestRouteOptimizationEndpoints(t *testing.T) {
 		_, err = env.db.Exec(env.ctx, `
 		INSERT INTO tour_guide.time_between_sights (sight1_id, sight2_id, travel_time, distance_meters)
 		VALUES 
-			(1, 4, INTERVAL '5 minutes', 400), (4, 1, INTERVAL '5 minutes', 400),
+			(1, 4, INTERVAL '15 minutes', 400), (4, 1, INTERVAL '15 minutes', 400),
 			(4, 2, INTERVAL '5 minutes', 400), (2, 4, INTERVAL '5 minutes', 400),
 			(4, 3, INTERVAL '5 minutes', 400), (3, 4, INTERVAL '5 minutes', 400)
 		`)
 		require.NoError(t, err)
 		
 		input := api.OptimizeRouteInput{
-			SightIds: []int{1, 2, 4, 3},
+			SightIds: []int{1, 4, 2, 3},
 		}
 		reqBody, _ := json.Marshal(input)
 
