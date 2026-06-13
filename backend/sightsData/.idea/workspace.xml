@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="dc79c373-466f-42db-967d-674880798d37" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/data/repository/TestRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/data/repository/TestRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/domain/entities/Sight.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/domain/entities/Sight.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/domain/interfaces/Repository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/domain/interfaces/Repository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/ChooseSightsMapScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/ChooseSightsMapScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/ChooseSightsScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/ChooseSightsScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/ChooseSightsSearchScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/ChooseSightsSearchScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/MapContainer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/map/MapContainer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/MapMarkers.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/map/MapMarkers.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/ShowSightDetail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/map/ShowSightDetail.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/SightsMapitem.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/ui/components/map/SightsMapitem.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/viewModel/SightsViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/app/src/main/java/com/example/touristguide/presentation/viewModel/SightsViewModel.kt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="36KhrkCfDIstADlNMlZ1mQMOQDy" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;front&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="dc79c373-466f-42db-967d-674880798d37" name="Changes" comment="" />
+      <created>1764761372042</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1764761372042</updated>
+    </task>
+    <servers />
+  </component>
+</project>
