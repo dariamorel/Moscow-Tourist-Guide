@@ -1,5 +1,7 @@
 package com.example.touristguide.data.mapper
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.touristguide.data.dto.AchievementDto
 import com.example.touristguide.data.dto.RouteDto
 import com.example.touristguide.data.dto.RouteUpdateInputDto
@@ -13,12 +15,12 @@ import java.time.OffsetDateTime
 fun SightDto.toDomain(): Sight {
     return Sight(
         id = id,
+        title = title,
         image = img,
-        title = shortDesc,
+        description = shortDesc,
         address = addr,
         timetable = timetable,
         phone = phone,
-        description = shortDesc,
         bodyText = desc,
         coords = GeoPoint(lat, lon),
         subway = subway,
@@ -26,6 +28,7 @@ fun SightDto.toDomain(): Sight {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun RouteDto.toDomain(): Route {
     val plannedSights = plannedOrder.orEmpty().map { it.toDomain() }
     val passedIds = order.orEmpty().toSet()

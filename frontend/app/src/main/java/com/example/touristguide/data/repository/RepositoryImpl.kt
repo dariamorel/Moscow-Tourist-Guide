@@ -1,7 +1,9 @@
 package com.example.touristguide.data.repository
 
 import android.content.SharedPreferences
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import com.example.touristguide.data.dto.RouteInputDto
 import com.example.touristguide.data.mapper.toDomain
@@ -25,7 +27,7 @@ class RepositoryImpl(
         tag: String?
     ): List<Sight> {
         val sights = dataService.getAllSights(
-            limit = limit ?: 300,
+            limit = limit ?: 200,
             offset = offset,
             tag = tag
         ).map { it.toDomain() }
@@ -33,6 +35,7 @@ class RepositoryImpl(
         return sights
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun getAllRoutes(): List<Route> {
         val routes = dataService.getRoutes(
             token = getToken(),
@@ -63,7 +66,7 @@ class RepositoryImpl(
 
     override suspend fun optimizeRoute(sights: List<Int>): OptimizedSightsOrder {
         val response = dataService.optimizeRoute(sights)
-        Log.d(Repository.REPOSITORY_TAG, "Got optimized sights list: ${response.optimizedOrder.size}.")
+        Log.d(Repository.REPOSITORY_TAG, "Got optimized sights list: ${response.optimizedOrder.joinToString(" ") { it.title }}.")
         return OptimizedSightsOrder(
             sights = response.optimizedOrder.map { it.toDomain() },
             totalTime = response.totalTime

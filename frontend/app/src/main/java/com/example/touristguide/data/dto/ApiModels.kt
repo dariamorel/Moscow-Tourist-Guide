@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class SightDto(
     val id: Int,
+    val title: String,
     val img: String,
     val lat: Double,
     val lon: Double,
