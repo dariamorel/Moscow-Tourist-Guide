@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.di.PresentationComponentHolder
+import com.example.touristguide.presentation.ui.common.ScreenBackButton
 import com.example.touristguide.presentation.ui.map_layer.MapMarkers
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @Composable
 fun CreateRouteMapScreen(
     onRouteCreate: (List<Sight>) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: CreateRouteMapViewModel = viewModel(
@@ -142,6 +144,13 @@ fun CreateRouteMapScreen(
             }
 
             if (!isSearchOpen) {
+                ScreenBackButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 4.dp, top = 4.dp)
+                )
+
                 MapSearchBar(
                     onClick = { viewModel.openSearch() },
                     modifier = Modifier

@@ -27,7 +27,7 @@ class RepositoryImpl(
         tag: String?
     ): List<Sight> {
         val sights = dataService.getAllSights(
-            limit = limit ?: 200,
+            limit = limit ?: 300,
             offset = offset,
             tag = tag
         ).map { it.toDomain() }

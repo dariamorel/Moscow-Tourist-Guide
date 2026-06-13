@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.touristguide.presentation.ui.common.ScreenHeader
 
 @Composable
 fun LoginScreen(
@@ -115,6 +116,7 @@ fun LoginScreen(
 fun RegisterScreen(
     viewModel: AuthorizationViewModel,
     onRegisterSuccess: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -127,19 +129,12 @@ fun RegisterScreen(
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(horizontal = 24.dp)
     ) {
-        Text(
-            text = "Регистрация",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 32.dp),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
-            ),
-            color = Color.Black,
-            textAlign = TextAlign.Center
+        ScreenHeader(
+            title = "Регистрация",
+            onBack = onBack,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
         AuthTextField(

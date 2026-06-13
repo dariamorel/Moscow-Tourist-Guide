@@ -9,12 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,12 +28,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.di.PresentationComponentHolder
+import com.example.touristguide.presentation.ui.common.ScreenBackButton
 
 @Composable
 fun DetailedSightScreen(
     routeId: Int,
     sight: Sight,
-    onClose: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: DetailedSightViewModel = viewModel(
@@ -58,23 +54,10 @@ fun DetailedSightScreen(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                IconButton(
-                    onClick = onClose,
-                    modifier = Modifier.align(Alignment.TopEnd)
-                ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = Color.White,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = null,
-                            modifier = Modifier.padding(4.dp),
-                            tint = Color.Black
-                        )
-                    }
-                }
+                ScreenBackButton(
+                    onClick = onBack,
+                    modifier = Modifier.align(Alignment.TopStart)
+                )
             }
         }
 
@@ -149,7 +132,7 @@ fun DetailedSightScreen(
         if (!isPassed) {
             item {
                 Surface(
-                    onClick = { viewModel.markAsPassed(onClose) },
+                    onClick = { viewModel.markAsPassed(onBack) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 24.dp),

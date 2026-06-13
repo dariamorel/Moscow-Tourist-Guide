@@ -20,9 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.touristguide.presentation.di.PresentationComponentHolder
+import com.example.touristguide.presentation.ui.common.ScreenHeader
 
 @Composable
 fun ProfileScreen(
+    onBack: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -34,19 +36,12 @@ fun ProfileScreen(
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(horizontal = 24.dp)
     ) {
-        Text(
-            text = "Профиль",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 32.dp),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
-            ),
-            color = Color.Black,
-            textAlign = TextAlign.Center
+        ScreenHeader(
+            title = "Профиль",
+            onBack = onBack,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
         Text(

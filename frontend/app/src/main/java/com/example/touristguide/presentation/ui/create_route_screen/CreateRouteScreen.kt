@@ -37,11 +37,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.di.PresentationComponentHolder
+import com.example.touristguide.presentation.ui.common.ScreenBackButton
 
 @Composable
 fun CreateRouteScreen(
     optimizedSightsOrder: OptimizedSightsOrder,
     modifier: Modifier = Modifier,
+    onBack: () -> Unit,
     onRouteCreate: () -> Unit
 ) {
     val viewModel: CreateRouteViewModel = viewModel(
@@ -57,6 +59,8 @@ fun CreateRouteScreen(
             .background(Color.White)
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
+        ScreenBackButton(onClick = onBack)
+
         OutlinedTextField(
             value = routeName,
             onValueChange = viewModel::updateRouteName,

@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -52,6 +51,7 @@ import coil.compose.AsyncImage
 import com.example.touristguide.domain.entities.Route
 import com.example.touristguide.domain.entities.Sight
 import com.example.touristguide.presentation.di.PresentationComponentHolder
+import com.example.touristguide.presentation.ui.common.ScreenBackButton
 
 @Composable
 fun GoRouteScreen(
@@ -127,21 +127,16 @@ private fun GoRouteHeader(
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
-        IconButton(
-            onClick = onOpenMap,
+        ScreenBackButton(
+            onClick = onClose,
             modifier = Modifier.align(Alignment.CenterStart)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_map),
-                contentDescription = "Карта маршрута",
-                modifier = Modifier.size(28.dp),
-                tint = Color.Black
-            )
-        }
+        )
 
         Text(
             text = title,
-            modifier = Modifier.align(Alignment.Center),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 56.dp),
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
@@ -151,12 +146,13 @@ private fun GoRouteHeader(
         )
 
         IconButton(
-            onClick = onClose,
+            onClick = onOpenMap,
             modifier = Modifier.align(Alignment.CenterEnd)
         ) {
             Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = null,
+                painter = painterResource(R.drawable.ic_map),
+                contentDescription = "Карта маршрута",
+                modifier = Modifier.size(28.dp),
                 tint = Color.Black
             )
         }

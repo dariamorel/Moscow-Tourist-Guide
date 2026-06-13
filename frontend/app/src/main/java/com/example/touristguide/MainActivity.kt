@@ -6,11 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,8 +21,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.touristguide.data.di.DataComponentHolder
 import com.example.touristguide.domain.entities.OptimizedSightsOrder
 import com.example.touristguide.domain.entities.Route
@@ -39,6 +41,7 @@ import com.example.touristguide.presentation.ui.optimizing_loading_screen.Optimi
 import com.example.touristguide.presentation.ui.profile_screen.ProfileScreen
 import com.example.touristguide.presentation.ui.route_map_screen.RouteMapScreen
 import com.example.touristguide.ui.theme.TouristGuideTheme
+import androidx.navigation.navArgument
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -75,6 +78,15 @@ fun MainScreen(
     val repository = remember { DataComponentHolder.component.repository }
     val startDestination = remember {
         if (repository.isLogin()) Screens.MY_ROUTES.name else AUTH_GRAPH
+    }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val canNavigateBack = currentRoute != Screens.MY_ROUTES.name &&
+        currentRoute != Screens.LOGIN.name
+
+    BackHandler(enabled = canNavigateBack) {
+        navController.popBackStack()
     }
 
     NavHost(
@@ -118,6 +130,7 @@ fun MainScreen(
                 RegisterScreen(
                     viewModel = authViewModel,
                     modifier = modifier,
+                    onBack = { navController.popBackStack() },
                     onRegisterSuccess = {
                         navController.navigate(Screens.MY_ROUTES.name) {
                             popUpTo(AUTH_GRAPH) { inclusive = true }
@@ -149,6 +162,7 @@ fun MainScreen(
         composable(Screens.PROFILE.name) {
             ProfileScreen(
                 modifier = modifier,
+                onBack = { navController.popBackStack() },
                 onLogout = {
                     navController.navigate(AUTH_GRAPH) {
                         popUpTo(0) { inclusive = true }
@@ -160,6 +174,7 @@ fun MainScreen(
         composable(Screens.CREATE_ROUTE_MAP.name) {
             CreateRouteMapScreen(
                 modifier = modifier,
+                onBack = { navController.popBackStack() },
                 onRouteCreate = { sights ->
                     val sightIds = sights.joinToString(",") { it.id.toString() }
                     navController.navigate("${Screens.OPTIMIZING_LOADING.name}/${sightIds}")
@@ -175,13 +190,14 @@ fun MainScreen(
             val ids = idsString.split(",").mapNotNull { it.toIntOrNull() }
             OptimizingLoadingScreen(
                 sightIds = ids,
-                modifier = modifier
+                modifier = modifier,
+                onBack = { navController.popBackStack() }
             ) { optimizedSightsOrder ->
-                navController.currentBackStackEntry?.savedStateHandle?.set(
-                    "optimizedOrder",
-                    optimizedSightsOrder
-                )
-                navController.navigate(Screens.CREATE_ROUTE.name)
+                navController.getBackStackEntry(Screens.CREATE_ROUTE_MAP.name)
+                    .savedStateHandle["optimizedOrder"] = optimizedSightsOrder
+                navController.navigate(Screens.CREATE_ROUTE.name) {
+                    popUpTo(Screens.CREATE_ROUTE_MAP.name) { inclusive = false }
+                }
             }
         }
 
@@ -192,14 +208,19 @@ fun MainScreen(
                 ?: OptimizedSightsOrder()
             CreateRouteScreen(
                 optimizedSightsOrder = optimizedOrder,
-                modifier = modifier
-            ) {
-                navController.navigate(Screens.MY_ROUTES.name)
-            }
+                modifier = modifier,
+                onBack = { navController.popBackStack() },
+                onRouteCreate = {
+                    navController.popBackStack(Screens.MY_ROUTES.name, inclusive = false)
+                }
+            )
         }
 
         composable(Screens.ACHIEVEMENTS.name) {
-            AchievementsScreen(modifier = modifier)
+            AchievementsScreen(
+                modifier = modifier,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Screens.GO_ROUTE.name) {
@@ -235,7 +256,7 @@ fun MainScreen(
                 RouteMapScreen(
                     route = route,
                     modifier = modifier,
-                    onBackToRoute = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() }
                 )
             }
         }
@@ -253,7 +274,7 @@ fun MainScreen(
                     routeId = routeId,
                     sight = sight,
                     modifier = modifier,
-                    onClose = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() }
                 )
             }
         }

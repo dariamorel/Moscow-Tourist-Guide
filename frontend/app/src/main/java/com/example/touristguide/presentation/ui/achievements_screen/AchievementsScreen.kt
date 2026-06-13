@@ -37,9 +37,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.touristguide.domain.entities.Achievement
 import com.example.touristguide.presentation.di.PresentationComponentHolder
+import com.example.touristguide.presentation.ui.common.ScreenHeader
 
 @Composable
 fun AchievementsScreen(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: AchievementsViewModel = viewModel(
@@ -66,17 +68,9 @@ fun AchievementsScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Text(
-            text = "Мои достижения",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
-            ),
-            color = Color.Black,
-            textAlign = TextAlign.Center
+        ScreenHeader(
+            title = "Мои достижения",
+            onBack = onBack
         )
 
         HorizontalDivider(color = Color(0xFFE0E0E0))
@@ -101,14 +95,6 @@ private fun AchievementListItem(achievement: Achievement) {
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.Top
     ) {
-        AsyncImage(
-            model = achievement.iconUrl,
-            contentDescription = achievement.name,
-            modifier = Modifier.size(48.dp),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(contentColor)
-        )
-
         Column(
             modifier = Modifier
                 .weight(1f)
